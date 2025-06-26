@@ -1,0 +1,17 @@
+/* cssファイル */
+.login{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 40vw;
+  margin: 10vh auto;
+  padding: 20vh 0;
+  border: 1.5px solid black;
+  border-radius: 12px;
+}
+
+.input{
+  border-bottom: 1.5px solid black;
+}
