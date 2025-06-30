@@ -1,17 +1,99 @@
 /* cssファイル */
-.login{
+.div{
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   width: 40vw;
+  height: 60vh;
   margin: 10vh auto;
-  padding: 20vh 0;
+  padding: 40px 20px;
   border: 1.5px solid black;
-  border-radius: 12px;
+  border-radius: 24px;
+  gap: 5px;
 }
 
-.input{
-  border-bottom: 1.5px solid black;
+.div a{
+  color: #ffc000;
+}
+
+/* formのスタイル */
+.loginForm{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* h2タブのスタイル */
+.h2{
+  font-weight: bold; 
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+/* ログインボタンのスタイル */
+.loginBtn{
+  border: 1.5px solid #6b6b6b;
+  border-radius: 12px;
+  padding: 1% 5%;
+  color: white;
+  font-weight: bold;
+  background-color: #ffc000;
+  margin-bottom: 10px;
+}
+
+/* 入力欄のスタイル */
+.inputContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+/* ラベル */
+.inputContent label {
+  position: absolute;
+  background-color: white;
+  padding: 0 5px;
+  color: orange;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* inputタブのスタイル */
+.content{
+  border: 2px solid black;
+  padding: 6px 12px;
+  font-size: 16px;
+}
+
+/* ユーザーIDのスタイル */
+.inputContent .content{
+  background-color: transparent;
+}
+
+/* ラベルをinputの中に重ねて表示 */
+.inputContent .content ~ label {
+  position: absolute;
+  top: 25%;
+  left: 3px;
+  font-size: 16px;
+  color: #aaaaaa;
+  transition: 0.3s;
+}
+
+/* 入力時のラベルのアニメーション */
+.inputContent .content:focus ~ label{
+  font-size: 15px;
+  top: -14px;
+  left: 3px;
+  color: #ffc000;
+}
+
+/* 入力時のアニメーション */
+.content:focus{
+  outline: none;
+  border-color: #ffc000;
 }
