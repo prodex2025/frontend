@@ -3,10 +3,15 @@
 import styles from '../../styles/approvals.module.css';
 
 // コンポーネント読み込み
-import ApprovalsButton from '@/components/atoms/approvalsButton';
-import ApprovalsInput from '@/components/atoms/approvalsInput';
+import ApprovalsButton from '@/components/atoms/ApprovalsButton';
+import ApprovalsInput from '@/components/atoms/ApprovalsInput';
 
 export default function LoginPage() {
+  //ログインボタンを押したときの処理
+  function login(){
+    console.log("ログインボタンが押されました。");
+  }
+
   return (
     <div className={styles.div}>
       <form className={styles.loginForm}>
@@ -19,7 +24,7 @@ export default function LoginPage() {
         <ApprovalsInput type="password" name='password' id='password' text="パスワード"/>
 
         {/* ログインボタン */}
-        <ApprovalsButton type="submit" onClick="handleClick()" text="ログイン"/>
+        <ApprovalsButton type="submit" onClick={login()} text="ログイン"/>
       </form>
 
       <p>アカウントが未登録ですか？</p>
