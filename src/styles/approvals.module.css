@@ -56,17 +56,20 @@
 .inputContent label {
   position: absolute;
   background-color: white;
-  padding: 0 5px;
-  color: orange;
+  padding: 0 3px;
+  color: #313131;
   font-weight: bold;
   font-size: 14px;
+  top: -14px;
+  left: 3px;
 }
 
 /* inputタブのスタイル */
 .content{
   border: 2px solid black;
-  padding: 6px 12px;
+  padding: 6px 5px;
   font-size: 16px;
+  width: 100%;
 }
 
 /* ユーザーIDのスタイル */
@@ -74,26 +77,12 @@
   background-color: transparent;
 }
 
-/* ラベルをinputの中に重ねて表示 */
-.inputContent .content ~ label {
-  position: absolute;
-  top: 25%;
-  left: 3px;
-  font-size: 16px;
-  color: #aaaaaa;
-  transition: 0.3s;
-}
-
-/* 入力時のラベルのアニメーション */
-.inputContent .content:focus ~ label{
-  font-size: 15px;
-  top: -14px;
-  left: 3px;
-  color: #ffc000;
-}
-
 /* 入力時のアニメーション */
-.content:focus{
+.content:focus{ 
   outline: none;
   border-color: #ffc000;
+}
+
+.inputContent:has(input:focus) label{
+  color: #ffc000;
 }
