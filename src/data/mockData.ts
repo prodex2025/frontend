@@ -59,6 +59,7 @@ export const restaurants:Restaurants[] = [
     email:'tekist@demo.ac',
     owner_id:3,
     descrption:'おいしいお肉のお店です',
+    img_url:'/image/shop.jpg',
   },
   {
     id:2,
@@ -69,6 +70,7 @@ export const restaurants:Restaurants[] = [
     email:'exsample@test.ac.jp',
     owner_id:3,
     descrption:'いい香りがします',
+    img_url:'/image/shop.jpg',
   },
   {
     id:3,
@@ -79,6 +81,7 @@ export const restaurants:Restaurants[] = [
     email:'exsample@exsample.com',
     owner_id:4,
     descrption:'おいしい三食団子です',
+    img_url:'/image/shop.jpg',
   },
   {
     id:4,
@@ -89,6 +92,7 @@ export const restaurants:Restaurants[] = [
     email:'text@exsample.com',
     owner_id:4,
     descrption:'タピオカ',
+    img_url:'/image/shop.jpg',
   },
 ]
 
