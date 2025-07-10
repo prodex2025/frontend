@@ -1,0 +1,30 @@
+/* ヘッダー部分 */
+.header{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: beige;
+}
+
+.search {
+    text-align: center ;
+    height: 40px;
+    width: 30%;
+    padding: 7px;
+    margin-top: 25px;
+    border : 1px solid #2c2c2c;
+    border-radius: 20px;
+    color: #2c2c2c;
+}
+
+.categoryList {
+    display: flex;
+    overflow-x: auto; /*横スクロール可能 */
+    scroll-behavior: smooth;
+}
+
+.categoryItem{
+    white-space: nowrap;
+    
+}
