@@ -24,6 +24,7 @@ export interface Restaurants{
   email:string;     // メールアドレス
   owner_id:number;  // 経営者のユーザーID(外部キー)
   descrption:string;// 店舗のメモ
+  image_url: string;
 }
 
 // メニュー 

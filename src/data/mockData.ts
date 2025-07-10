@@ -49,6 +49,7 @@ export const users: User[] = [
   }
 ]
 
+//店舗情報
 export const restaurants:Restaurants[] = [
   {
     id:1,
@@ -59,6 +60,7 @@ export const restaurants:Restaurants[] = [
     email:'tekist@demo.ac',
     owner_id:3,
     descrption:'おいしいお肉のお店です',
+    image_url: '/image/shop.png',
   },
   {
     id:2,
@@ -69,16 +71,18 @@ export const restaurants:Restaurants[] = [
     email:'exsample@test.ac.jp',
     owner_id:3,
     descrption:'いい香りがします',
+    image_url: '/image/tokyo-deli.png',
   },
   {
     id:3,
     name:'ももたろう',
-    address:'兵庫県神戸市兵庫区松本通',
+    address:'〒123-1234 兵庫県神戸市中央区御幸通り3丁目2-4 何とかプラザ1F ',
     postcode: '6520045',
     phone:'07022223333',
     email:'exsample@exsample.com',
     owner_id:4,
     descrption:'おいしい三食団子です',
+    image_url: '/image/yakiniku.png',
   },
   {
     id:4,
@@ -89,7 +93,9 @@ export const restaurants:Restaurants[] = [
     email:'text@exsample.com',
     owner_id:4,
     descrption:'タピオカ',
+    image_url: '/image/shop.png',
   },
+  
 ]
 
 export const dishes:Dishes[] = [
@@ -222,7 +228,7 @@ export const categories:Categories[] = [
   },
   {
     id:5,
-    name:'団子'
+    name:'焼肉'
   },
   {
     id:6,
@@ -230,8 +236,73 @@ export const categories:Categories[] = [
   },
   {
     id:7,
+    name:'イタリアン'
+  },
+  {
+    id:8,
+    name:'中華'
+  },
+  {
+    id:9,
     name:'和食'
   },
+  {
+    id:10,
+    name:'フレンチ'
+  },
+  {
+    id:11,
+    name:'エスニック'
+  },
+  {
+    id:12,
+    name:'カフェ'
+  },
+  {
+    id:13,
+    name:'韓国料理'
+  },
+  {
+    id:14,
+    name:'デザート'
+  },
+  {
+    id:15,
+    name:'バー'
+  },
+  {
+    id:16,
+    name:'居酒屋'
+  },
+  {
+    id:17,
+    name:'ファストフード'
+  },
+  {
+    id:18,
+    name:'スイーツ・デザート'
+  },
+  {
+    id:19,
+    name:'タイ'
+  },
+  {
+    id:20,
+    name:'ベトナム'
+  },
+  {
+    id:21,
+    name:'インド'
+  },
+  {
+    id:22,
+    name:'寿司'
+  },
+  {
+    id:23,
+    name:'ラーメン'
+  },
+
 ]
 
 export const reataurants_categories:Reataurants_Categories[] = [

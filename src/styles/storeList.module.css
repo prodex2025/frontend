@@ -1,0 +1,240 @@
+/* ラッパー：画面全体レイアウト（固定 + スクロール） */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 固定されるヘッダー部分 */
+.fixedHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  padding-bottom: 10px;
+  box-shadow: none;
+}
+
+/* スクロールされる部分 */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Chrome・Edge・Safari用：スクロールバーの親指（カプセル）だけ色変更 */
+.scrollArea::-webkit-scrollbar-thumb {
+  background-color: #ffd700; /* 棒の色*/
+  border-radius: 8px;
+}
+
+/* 必須：スクロールバー本体の背景は透明にしておく（矢印残す） */
+.scrollArea::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+/* 全体レイアウトの設定 */
+.container {
+  background: #fdfdfd;
+  font-family: "Helvetica Neue", sans-serif;
+  padding: 20px;     /* 周囲に余白を付ける */
+  margin: 0;    /* 外側余白なし */
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,      /* 塗りつぶしなし */
+    'wght' 400,    /* ウェイト（太さ） */
+    'GRAD' 0,       /* グラデーションなし */
+    'opsz' 24;      /* 最適化サイズ */
+}
+
+/* 検索バー */
+.searchBar {
+  display: flex;      /* フレックスボックスで中央寄せ */
+  justify-content: center;      /* 横方向中央揃え */
+  margin-bottom: 20px;            /* 下に余白 */
+  margin-top: 20px;            /* 下に余白 */
+}
+
+/* 検索バーの入力欄と虫眼鏡アイコンを包んでいるコンテナ要素 */
+.searchWrapper {
+  display: flex;         /* 入力とアイコンを横並びに */
+  align-items: center;    /* 縦位置を中央揃え */
+  width: 768px;      /* 幅を固定 */
+  height: 40px;
+  padding: 0 20px;            /* 左右に内側余白 */
+  border-radius: 42px;       /* 丸みをつける */
+  background: #ffffff;   /* 背景白 */
+  box-shadow:
+    inset 5px 5px 10px #a6b4c8,       /* 内側の影（左下） */
+    inset -5px -5px 15px #ffffff;     /* 内側の影（右上） */
+  border: 1px solid #ccc;     /* 枠線 */
+}
+
+/* 虫眼鏡アイコン */
+.searchIcon {
+  font-size: 24px;
+  color: #999;
+  margin-right: 12px;      /* 入力との間に余白 */
+}
+
+/* 検索入力欄の「テキスト部分だけ」へのスタイル */
+.searchWrapper input {
+  flex: 1;       /* アイコンの横で、残りの幅ぜんぶ使う */
+  border: none;  /* 枠線を消す（親に枠をつけてるため） */
+  outline: none;   /* フォーカス時の青い縁を消す（デフォルト無効） */
+  font-size: 16px;
+  background: transparent;     /* 背景を透明に（親が背景を持ってるので） */
+}
+
+/* 検索欄のプレースホルダー（"店舗検索"の文字） */
+.searchWrapper input::placeholder {
+  text-align: center;
+}
+
+/* 矢印とカテゴリータグを包む枠 */
+.filterScrollWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 8px;
+}
+
+/* 左右の矢印アイコン（Material Symbols）の見た目設定 */
+.scrollIcon {
+  font-size: 32px;
+  color: rgba(100, 100, 100, 0.25);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s;
+}
+
+.scrollIcon:hover {
+  color: rgba(100, 100, 100, 0.5);
+}
+
+/* 左右の矢印アイコン（Material Symbols）の見た目設定 */
+.left {
+  transform: scaleX(-1);
+}
+
+/* カテゴリーボタンの横スクロール領域 */
+.filterScroll {
+  border-bottom: 1px solid #ccc;
+  overflow-x: auto;       /*横にスクロールできるように*/
+  white-space: nowrap;    /*ボタンを折り返さず一列に並べる*/
+  padding-bottom: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 横スクロールバーを非表示に */
+.filterScroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* 中にある各カテゴリータグを横並びで配置するグループ要素 */
+.filterButtons {
+  display: inline-flex;
+  gap: 10px;
+}
+
+/* カテゴリータグのスタイル */
+.filterButton {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  background: #ddd;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.3s, color 0.3s;
+  color: #333;
+}
+
+/* カテゴリータグクリックしたとき */
+.selected {
+  background: #ffd700;
+  color: #fff;
+}
+
+/* ショップカードの一覧全体を囲む外枠 */
+.shopList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+  min-height: 300px;
+  margin: 0 auto;
+}
+
+ /* 1つの店舗を表すカード全体の枠 */
+.shopCard {
+  width: clamp(300px, 80vw, 900px);          /* 最小280px、画面幅の80%、最大900px */
+  display: flex;            /*中の「画像」と「情報」を横並びに*/
+  background: white;
+  border-radius: 16px;            /*カード角を丸く*/
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);     /*ふわっとした立体感を出す*/
+  overflow: hidden;                /*内部の画像などが角丸からはみ出さないように*/
+  transition: transform 0.2s;     /*ホバー時のアニメーションを滑らかに*/
+  height: 100%;
+  padding: 20px;              /*内側の余白*/
+  gap: 20px;                /*画像とテキストの間にスペース*/
+  margin: 0 auto;          /*中央揃え*/
+  margin-top: 10px;
+}
+
+.shopCard:hover {
+  transform: translateY(-3px);
+}
+
+.shopImage {
+  width: clamp(150px, 40vw, 400px);
+  height: auto;
+  object-fit: cover;
+}
+
+/* 画像の横にある「店舗名・情報テキスト」をまとめた枠 */
+.shopInfo {
+  width: 500px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ショップ情報の背景パネル */
+.shopInfoPanel {
+  background-color: #EEF1F5;
+  border-radius: 12px;    /* 少し丸みを持たせる */
+  padding: 24px 28px;     /* 内側余白をしっかり取る */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;         /* 情報同士の隙間 */
+  box-shadow:
+    inset 5px 5px 10px #A6B4C8,     /* 内側の影（左上） */
+    inset -5px -5px 15px #ffffff;  /* 内側の影（右下） */
+  height: 250px;  /* 背景パネルだけ縦に伸ばす */
+}
+
+/* 店舗名（見出し）用スタイル */
+.shopInfo h3 {
+  margin: 0 0 8px;
+  font-size: clamp(16px, 3vw, 30px);
+}
+
+/* 住所・カテゴリなどのテキストスタイル */
+.shopInfo p {
+  margin: 10px 0;
+  font-size: clamp(12px, 2vw, 20px);
+  color: #333;
+}
+
+/* 画像クリックしたときにリンクっぽく青くならないように*/
+.shopCardLink {
+  text-decoration: none;
+  color: inherit;
+}
