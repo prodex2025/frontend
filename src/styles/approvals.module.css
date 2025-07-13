@@ -4,8 +4,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 40vw;
-  height: 60vh;
+  width: 40%;
   margin: 10vh auto;
   padding: 40px 20px;
   border: 1.5px solid black;
@@ -85,4 +84,14 @@
 
 .inputContent:has(input:focus) label{
   color: #ffc000;
+}
+
+.inputContent:has(textarea:focus) label{
+  color: #ffc000;
+}
+
+/* テキストエリアのスタイル */
+.inputContent textarea{
+  resize: none;
+  padding: 6px 15px;
 }
