@@ -1,0 +1,53 @@
+.businesContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.businesTimeContent{
+  all: unset;
+  display: inline-block;
+}
+
+/* 曜日のラベル */
+.label {
+  font-weight: bold;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 時間を設定する場所のスタイル */
+.businesTime{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  background-color: aquamarine;
+}
+
+.businesTime span{
+  margin: 3px 0 0 6px;
+}
+
+/* 時間を入力する場所のスタイル */
+.timeContent{ 
+  display: flex;
+  flex-direction: row;
+  white-space: nowrap;
+}
+
+.timeContent span{
+  display: inline-block;
+  line-height: 1;
+}
+
+.timeContent input{
+  display: inline-block;
+  border: 1.5px solid black;
+  padding: 6px 5px;
+  font-size: 16px;
+}
