@@ -1,10 +1,10 @@
 //店舗一覧画面
-
 'use client';            // Next.js の App Router でクライアントコンポーネントとして扱う宣言
 
 // CSS Modules（このページ専用のスタイル）
 import styles from '@/styles/storeList.module.css';
-import '@/app/globals.css';       // グローバルCSS（共通スタイル）
+// グローバルCSS（共通スタイル）
+import '@/app/globals.css';
 
 //コンポーネントのインポート
 import CategoryTag from '@/components/atoms/CategoryTag.jsx';       // カテゴリー用の再利用コンポーネント
@@ -19,6 +19,7 @@ import clsx from 'clsx';     // 条件付きで className を結合するユー�
 
 export default function HomePage() {
   const scrollAreaRef = useRef(null);
+
   // 現在選択されているカテゴリー名の集合（Setで重複なく管理）
   const [selected, setSelected] = useState(new Set());
 
@@ -59,7 +60,6 @@ export default function HomePage() {
       
     }
   };
-
 
   // 初回マウント時に mock データを加工して shops にセット    
   useEffect(() => {
@@ -149,6 +149,7 @@ export default function HomePage() {
             <div className={styles.noResult}>該当する店舗は見つかりませんでした。</div>
           ) : (
             paginatedShops.map((shop) => (
+
               <ShopCard key={shop.id} shop={shop} />
             ))
           )}
