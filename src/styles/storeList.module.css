@@ -21,6 +21,7 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 10px;
+  min-height: 70px; /* ← これ追加：最低でも40pxにはする */
 }
 
 /* Chrome・Edge・Safari用：スクロールバーの親指（カプセル）だけ色変更 */

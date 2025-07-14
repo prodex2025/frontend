@@ -25,6 +25,7 @@ export interface Restaurants{
   owner_id:number;  // 経営者のユーザーID(外部キー)
   descrption:string;// 店舗のメモ
   image_url: string;
+  image_detail_url: string;
 }
 
 // メニュー 
