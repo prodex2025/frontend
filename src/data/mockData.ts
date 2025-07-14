@@ -61,6 +61,7 @@ export const restaurants:Restaurants[] = [
     owner_id:3,
     descrption:'おいしいお肉のお店です',
     image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
   },
   {
     id:2,
@@ -72,6 +73,7 @@ export const restaurants:Restaurants[] = [
     owner_id:3,
     descrption:'いい香りがします',
     image_url: '/image/tokyo-deli.png',
+    image_detail_url:'/image/shop.png',
   },
   {
     id:3,
@@ -83,6 +85,7 @@ export const restaurants:Restaurants[] = [
     owner_id:4,
     descrption:'おいしい三食団子です',
     image_url: '/image/yakiniku.png',
+    image_detail_url:'/image/shop.png',
   },
   {
     id:4,
@@ -94,6 +97,139 @@ export const restaurants:Restaurants[] = [
     owner_id:4,
     descrption:'タピオカ',
     image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:5,
+    name:'月のうさぎ庵',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:6,
+    name:'グリル・パレット',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:7,
+    name:'麺屋 匠心（たくみごころ）',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:8,
+    name:'スパイス・ジャーニー',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:9,
+    name:' 椿坂珈琲（つばきざかコーヒー）',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'焔（ほむら）',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:10,
+    name:'アーク',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:11,
+    name:'然（ぜん）',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:12,
+    name:'ルナ',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:13,
+    name:'カラフル・デリ・ラボ',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'フワトロ喫茶「雲の上」',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:14,
+    name:'チャチャッとタコス！',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
+  },
+  {
+    id:15,
+    name:'ネオン・ヌードル・ダイナー',
+    address:'兵庫県神戸市兵庫区松本通',
+    postcode: '6520045',
+    phone:'09023555244',
+    email:'text@exsample.com',
+    owner_id:4,
+    descrption:'タピオカ',
+    image_url: '/image/shop.png',
+    image_detail_url:'/image/shop.png',
   },
   
 ]
@@ -284,15 +420,15 @@ export const categories:Categories[] = [
   },
   {
     id:19,
-    name:'タイ'
+    name:'タイ料理'
   },
   {
     id:20,
-    name:'ベトナム'
+    name:'ベトナム料理'
   },
   {
     id:21,
-    name:'インド'
+    name:'インド料理'
   },
   {
     id:22,
@@ -301,6 +437,18 @@ export const categories:Categories[] = [
   {
     id:23,
     name:'ラーメン'
+  },
+  {
+    id:24,
+    name:'薬膳料理'
+  },
+  {
+    id:25,
+    name:'カレー'
+  },
+  {
+    id:26,
+    name:'メキシカン料理'
   },
 
 ]
@@ -346,6 +494,47 @@ export const reataurants_categories:Reataurants_Categories[] = [
     restaurant_id:4,
     category_id:4,
   },
+  {
+    id:9,
+    restaurant_id:5,
+    category_id:12,
+  },
+  {
+    id:10,
+    restaurant_id:5,
+    category_id:18,
+  },
+  {
+    id:11,
+    restaurant_id:6,
+    category_id:26,
+  },
+  {
+    id:12,
+    restaurant_id:7,
+    category_id:23,
+  },
+  {
+    id:13,
+    restaurant_id:8,
+    category_id:26,
+  },
+  {
+    id:14,
+    restaurant_id:9,
+    category_id:12,
+  },
+  {
+    id:15,
+    restaurant_id:9,
+    category_id:14,
+  },
+  {
+    id:15,
+    restaurant_id:10,
+    category_id:19,
+  },
+  
 ]
 
 export const restaurants_business_hours:Restaurants_business_hours[] = [

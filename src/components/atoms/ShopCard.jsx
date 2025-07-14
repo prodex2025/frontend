@@ -25,7 +25,7 @@ import ShopInfo from '@/components/atoms/ShopInfo'; // 店舗情報
 
 export default function ShopCard({ shop }) {
   return (
-    <Link href={`/shops/${shop.id}`} className={styles.shopCardLink}>   
+    <Link href={`/store/list/details/${shop.id}`} className={styles.shopCardLink}>   
       <div className={styles.shopCard}>
         <img
           src={shop.imageUrl}
