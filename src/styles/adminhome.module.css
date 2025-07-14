@@ -7,24 +7,43 @@
     background-color: beige;
 }
 
-.search {
-    text-align: center ;
-    height: 40px;
-    width: 30%;
-    padding: 7px;
-    margin-top: 25px;
-    border : 1px solid #2c2c2c;
-    border-radius: 20px;
-    color: #2c2c2c;
-}
-
-.categoryList {
+/* 本体 */
+.main{
+    padding: 15px;
     display: flex;
-    overflow-x: auto; /*横スクロール可能 */
-    scroll-behavior: smooth;
+    flex-direction: column;
 }
 
-.categoryItem{
-    white-space: nowrap;
-    
+/* 表示種類セレクトボックス */
+.form{
+    display: flex;
+    justify-content: flex-end;
+    font-size: 15px;
+}
+
+.kindselect{
+    padding-left:12px;
+    padding-right:8px ;
+    margin: 8px;
+    margin-bottom: 20px;
+    outline: none;
+    border-bottom: 3px solid #ffc000;
+}
+
+.kindItem:focus {
+  background-color: #ffc000; 
+}
+
+/* 店舗一覧の表 */
+.storeRequestList{
+    text-align: center;
+}
+
+.storeRequestList th{
+    background-color: #fff1c2;
+}
+
+.storeRequestList tr{
+    border: 2px solid #e8e8e8;
+    line-height: 40px;
 }
