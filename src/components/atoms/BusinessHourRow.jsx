@@ -1,5 +1,5 @@
 // CSSのインポート
-import styles from '@/styles/BusinessHourRow.module.css';
+import styles from '@/styles/businessHourRow.module.css';
 
 export default function BusinessHourRow({ day, data, onChange }) {
   const { closed, start, end, breakStart, breakEnd } = data;
@@ -22,6 +22,8 @@ export default function BusinessHourRow({ day, data, onChange }) {
           <span>〜</span>
           <input type="time" value={end} onChange={(e) => onChange('end', e.target.value)} disabled={closed} />
         </div>
+      </div>
+      <div className={styles.businesTime}>
         <span>休憩時間</span>
         <div className={styles.timeContent}>
           {/* 休憩時間入力 */}

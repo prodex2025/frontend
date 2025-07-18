@@ -107,7 +107,7 @@ export default function Owner(){
           ) : (
             paginatedShops.map((shop) => (
 
-              <ShopCard key={shop.id} shop={shop} />
+              <ShopCard key={shop.id} shop={shop} url="/owner/dashboard/"/>
             ))
           )}
         </div>

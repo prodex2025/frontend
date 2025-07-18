@@ -150,7 +150,7 @@ export default function HomePage() {
           ) : (
             paginatedShops.map((shop) => (
 
-              <ShopCard key={shop.id} shop={shop} />
+              <ShopCard key={shop.id} shop={shop} url="/store/list/details/"/>
             ))
           )}
         </div>

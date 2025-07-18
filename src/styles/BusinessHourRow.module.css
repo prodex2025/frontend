@@ -2,52 +2,44 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-color: aliceblue;
 }
 
-.businesTimeContent{
-  all: unset;
-  display: inline-block;
+/* 横並びのラベル＋入力 */
+.businesTime {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-/* 曜日のラベル */
-.label {
+/* 営業時間/休憩時間の文字 */
+.businesTime span:first-child {
+  width: 80px;
+  flex-shrink: 0;
   font-weight: bold;
 }
 
+/* 時間入力ペア */
+.timeContent {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 時間入力ボックス */
+.timeContent input {
+  border: 1.5px solid black;
+  padding: 6px 5px;
+  font-size: 16px;
+  width: 100px;
+}
+
+/* 定休日チェック */
 .checkbox {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-/* 時間を設定する場所のスタイル */
-.businesTime{
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  width: 100%;
-  background-color: aquamarine;
-}
-
-.businesTime span{
-  margin: 3px 0 0 6px;
-}
-
-/* 時間を入力する場所のスタイル */
-.timeContent{ 
-  display: flex;
-  flex-direction: row;
-  white-space: nowrap;
-}
-
-.timeContent span{
-  display: inline-block;
-  line-height: 1;
-}
-
-.timeContent input{
-  display: inline-block;
-  border: 1.5px solid black;
-  padding: 6px 5px;
-  font-size: 16px;
+  margin-bottom: 8px;
 }

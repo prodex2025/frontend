@@ -1,6 +1,6 @@
 // ユーザーのログイン画面
 // CSSファイルの読み込み
-import styles from './page.module.css';
+import styles from '@/styles/approvals.module.css';
 
 export default function LoginPage() {
   return (
