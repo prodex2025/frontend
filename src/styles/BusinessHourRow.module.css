@@ -2,30 +2,40 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: aliceblue;
+  align-items: flex-start;
+  background-color: antiquewhite;
+  position: relative;
 }
 
-/* 横並びのラベル＋入力 */
 .businesTime {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  height: fit-content;
+  background-color: aqua;
+  width: 100%;
+}
+
+.businesTimeContent{
+  display: flex;
+  width: 100%;
+  background-color: blue;
 }
 
 /* 営業時間/休憩時間の文字 */
 .businesTime span:first-child {
   width: 80px;
-  flex-shrink: 0;
+  flex-shrink: 0;  /* 要素がコンテナの幅を超えた場合に縮小されるのを防ぐ */
   font-weight: bold;
 }
 
 /* 時間入力ペア */
 .timeContent {
+  /* !important は強制的に指定する */
   display: flex !important;
   flex-direction: row !important;
   align-items: center;
-  gap: 8px;
+  flex-basis: auto;
+  background-color: aliceblue;
 }
 
 /* 時間入力ボックス */
@@ -33,13 +43,18 @@
   border: 1.5px solid black;
   padding: 6px 5px;
   font-size: 16px;
-  width: 100px;
+  width: 100%;
 }
 
 /* 定休日チェック */
 .checkbox {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.businesTime span{
+  text-align: center;
+  padding: 0;
+  margin: 0;
 }

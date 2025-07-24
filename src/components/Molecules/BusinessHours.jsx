@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BusinessHourRow from '@/components/atoms/BusinessHourRow';
 
 // CSSをインポート
-import styles from '@/styles/BusinessHourRow.module.css';
+import styles from '@/styles/businessHourRow.module.css';
 
 const days = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
 
