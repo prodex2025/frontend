@@ -1,0 +1,144 @@
+/*店舗詳細画面のｃｓｓ*/
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.fixedHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  padding: 20px 20px 5px;
+  text-align: center;
+  color: black;
+ 
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+
+  
+  width: 100vw;         /* ビューポート幅に広げる */
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.address {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.address a {
+  color: #00bfff;
+  text-decoration: underline;
+}
+
+.categoryContainer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.divider {
+  height: 1px;
+  background-color: #ccc;
+  width: 100%;
+  margin: 0 0 10px;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 20px;
+  
+}
+
+/* Chrome・Edge・Safariのスクロールバー設定 */
+.scrollArea::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+.scrollArea::-webkit-scrollbar-thumb {
+  background-color: #ffd700;
+  border-radius: 8px;
+}
+
+.scrollArea::-webkit-scrollbar-button {
+  display: none; /* ← 矢印を非表示にする */
+}
+
+.tabContainer {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f9f9f9;
+  margin-bottom: 16px;
+}
+
+.tabButton {
+  position: relative;
+  flex: 1;
+  padding: 12px;
+  background-color: white;
+  border: none;
+  font-size: clamp(16px, 3vw, 25px);
+  cursor: pointer;
+  border-bottom: none;
+  text-align: center; /* 文字を中央に */
+}
+
+.tabButton.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;          /* 左端を50%に */
+  transform: translateX(-50%); /* 中央に移動 */
+  width: 60%;         /* 線の長さ、文字幅に合わせて調整 */
+  height: 2px;
+  background-color: #ffd700;
+  border-radius: 1px;
+}
+
+
+.active {
+  border-bottom: none;
+  font-weight: bold;
+}
+
+.tabContent {
+  padding: 16px;
+}
+
+.backButton {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background-color: white;
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 1000; /* 必要に応じて他UIの上に */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.backIcon {
+  font-size: 58px !important; /* ← まずは極端に */
+  color: black !important;      /* ← 見た目変化を確実にする */
+}
