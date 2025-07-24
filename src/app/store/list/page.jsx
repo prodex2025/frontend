@@ -1,6 +1,4 @@
-
 //店舗一覧画面
-
 
 'use client';            // Next.js の App Router でクライアントコンポーネントとして扱う宣言
 
@@ -15,7 +13,6 @@ import Pagination from '@/components/atoms/Pagination.jsx';         //ページ�
 
 // 仮のデータセットをインポート（店舗・カテゴリ・関連テーブル）
 import { restaurants, categories, reataurants_categories } from '@/data/mockData';
-
 
 import { useState, useEffect, useRef } from 'react';    // React の状態管理と副作用フック
 import { useSearchParams, useRouter } from 'next/navigation';   //ページ移動用
@@ -63,7 +60,6 @@ export default function HomePage() {
   return matchesCategory && matchesSearch;
 });
 
-
  // ページ分割された店舗リスト
   const totalPages = Math.ceil(filteredShops.length / itemsPerPage);
   const paginatedShops = filteredShops.slice(
@@ -78,8 +74,6 @@ export default function HomePage() {
       router.push(`/store/list?page=${page}`, { scroll: false });
     }
   };
-
-
 
   // 初回マウント時に mock データを加工して shops にセット    
   useEffect(() => {
@@ -104,14 +98,12 @@ export default function HomePage() {
     setShops(formattedShops);    // 加工済み店舗データをステートに保存
   }, []);
 
-
   // currentPageが変わったら、ページトップにスクロールする
   useEffect(() => {
   if (scrollAreaRef.current) {
     scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }, [currentPage]);
-
 
   // タグをクリックした時に呼ばれる関数（ON/OFFの切り替え）
   const toggleCategory = (name) => {
@@ -167,7 +159,6 @@ export default function HomePage() {
       </div>
 
       {/* 店舗一覧（スクロール可能） */}
-
       <div className={styles.scrollArea} ref={scrollAreaRef}>
         <div className={styles.shopList}>
           {/* フィルターされた店舗のみ表示 */}
