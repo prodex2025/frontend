@@ -30,10 +30,14 @@ import styles from '@/styles/storeList.module.css';
 export default function CategoryTag({ label, selected = false, onClick, className }) {
   return (
     <button
-      className={clsx(className, {
-        [styles.selected]: selected,
-        [styles.clickable]: !!onClick, // クリック可能ならカーソル変えるなどのスタイル付けもできる
-      })}
+      className={clsx(
+        styles.filterButton,              // ← 基本スタイル（カプセル型）
+        {
+          [styles.selected]: selected,   // ← 選択状態（黄色）
+          [styles.clickable]: !!onClick, // ← クリック可能なとき
+        },
+        className                         // ← 外から渡された追加クラス
+      )}
       onClick={onClick}
       type="button"
       disabled={!onClick} // クリック不要ならボタン無効化も可能

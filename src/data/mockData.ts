@@ -54,7 +54,7 @@ export const restaurants:Restaurants[] = [
   {
     id:1,
     name:'レスタウラン',
-    address:'兵庫県神戸市兵庫区松本通',
+    address:'兵庫県神戸市兵庫区松本通1丁目',
     postcode: '6520045',
     phone:'08055664756',
     email:'tekist@demo.ac',
@@ -66,7 +66,7 @@ export const restaurants:Restaurants[] = [
   {
     id:2,
     name:'はなさかじいさん',
-    address:'兵庫県神戸市兵庫区上沢通',
+    address:'兵庫県神戸市兵庫区上沢通1丁目',
     postcode: '6520046',
     phone:'07022334455',
     email:'exsample@test.ac.jp',
@@ -78,7 +78,7 @@ export const restaurants:Restaurants[] = [
   {
     id:3,
     name:'ももたろう',
-    address:'〒123-1234 兵庫県神戸市中央区御幸通り3丁目2-4 何とかプラザ1F ',
+    address:'〒123-1234兵庫県神戸市中央区御幸通り3丁目',
     postcode: '6520045',
     phone:'07022223333',
     email:'exsample@exsample.com',
@@ -90,7 +90,7 @@ export const restaurants:Restaurants[] = [
   {
     id:4,
     name:'ごんちゃ',
-    address:'兵庫県神戸市兵庫区松本通',
+    address:'兵庫県神戸市中央区御幸通3丁目2-4',
     postcode: '6520045',
     phone:'09023555244',
     email:'text@exsample.com',
@@ -241,7 +241,7 @@ export const dishes:Dishes[] = [
     name:'ハンバーグ',
     price:500,
     description:'ハンバーグ',
-    image_url:'@/image/menu.jpg',
+    image_url:'@/image/humburger.png',
     video_url:'@/video/menu.mp4',
   },
   {
@@ -250,7 +250,7 @@ export const dishes:Dishes[] = [
     name:'パスタ',
     price:420,
     description:'パスタ',
-    image_url:'@/image/menu.jpg',
+    image_url:'@/image/pasuta.png',
     video_url:'@/video/menu.mp4',
   },
   {
@@ -259,15 +259,15 @@ export const dishes:Dishes[] = [
     name:'ステーキ',
     price:480,
     description:'ステーキ',
-    image_url:'@/image/menu.jpg',
+    image_url:'@/image/stake.png',
     video_url:'@/video/menu.mp4',
   },
   {
     id:4,
     restaurant_id:2,
-    name:'ステーキ',
-    price:480,
-    description:'ステーキ',
+    name:'パエリア',
+    price:600,
+    description:'YAMMY！！！',
     image_url:'@/image/menu.jpg',
     video_url:'@/video/menu.mp4',
   },
@@ -341,6 +341,24 @@ export const dishes:Dishes[] = [
     price:480,
     description:'ステーキ',
     image_url:'@/image/menu.jpg',
+    video_url:'@/video/menu.mp4',
+  },
+  {
+    id:13,
+    restaurant_id:1,
+    name:'パエリア',
+    price:600,
+    description:'YAMMY！！！',
+    image_url:'@/image/menu.jpg',
+    video_url:'@/video/menu.mp4',
+  },
+  {
+    id:14,
+    restaurant_id:1,
+    name:'刺身盛り合わせ',
+    price:600,
+    description:'新鮮でおいしいよ',
+    image_url:'@/image/sasimi.png',
     video_url:'@/video/menu.mp4',
   },
 ]
@@ -537,6 +555,7 @@ export const reataurants_categories:Reataurants_Categories[] = [
   
 ]
 
+//０が月、1が火、２が水って感じになってる
 export const restaurants_business_hours:Restaurants_business_hours[] = [
   {
     id:1,
