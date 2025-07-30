@@ -12,6 +12,7 @@ import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表
 import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
 import StoreDetailTab from '@/components/atoms/StoreDetailTab';     //詳細タブ用コンポーネント
 import StoreMenuTab from '@/components/atoms/StoreMenuTab'; // メニュータブ用コンポーネント
+import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統計情報用コンポーネント
 
 export default function StoreDetailPage() {
 
@@ -109,7 +110,7 @@ export default function StoreDetailPage() {
       {/* ここに画像・地図・レビューなどが入る想定 */}
       {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
       {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
-      {activeTab === 'statistics' && <StoreMenuTab restaurant={restaurant} />}
+      {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
     </div>
 
   </div>
