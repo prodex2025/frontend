@@ -7,7 +7,7 @@ import ApprovalsButton from '@/components/atoms/ApprovalsButton';
 import ApprovalsInput from '@/components/atoms/ApprovalsInput';
 import ApprovalsTextarea from '@/components/atoms/ApprovalsTextarea';
 import ApprovalsImg from '@/components/atoms/ApprovalsImg';
-import BusinessHours from '@/components/Molecules/BusinessHours';
+import BusinessHoursTable from '@/components/Molecules/BusinessHoursTable';
 
 export default function LoginPage() {
 
@@ -37,7 +37,7 @@ export default function LoginPage() {
             サービスのご利用にあたり、食品衛生法に基づく有効な「飲食店営業許可証（写し）」のご提出をお願いしております。<br />
             アップロードする際は、許可番号や有効期限、営業者名がはっきりと確認できるよう撮影した画像をご準備ください。
           </small>
-          <BusinessHours/>
+          <BusinessHoursTable />
         </div>
       </form>
       <ApprovalsButton type="submit" onClick={rigister} text="登録" />

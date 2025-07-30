@@ -1,0 +1,115 @@
+.content{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0 0 4px 0;
+  box-sizing: border-box;
+  height: auto;
+  margin: 0 !important; 
+  width: td;
+  gap: 0 !important;
+}
+
+/* 時間入力を行う場所 */
+.timeContent {
+  /* !important は強制的に指定する */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  width: auto;
+  padding: 0 ;
+  margin: 0 !important;
+  height: auto;
+}
+
+.selectWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 30px;
+}
+
+.selectWrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  border: 1px solid black;
+  font-size: 10px;
+  width: auto;
+  border-radius: 4px;
+  height: 16px;
+  line-height: 1;
+  padding: 0 18px 0 4px; /* 右に矢印のスペース */
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: 0;
+}
+
+.selectWrapper select:disabled {
+  background-color: #e0e0e0; /* 薄いグレー */
+  color: #666; /* 文字も少しグレーに */
+}
+
+
+/* selectWrapperの右端に矢印を表示 */
+.selectWrapper::after {
+  content: '▾';
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  pointer-events: none;
+  color: #333;
+  user-select: none;
+  background-color: transparent;
+}
+
+.timeContent option{
+  text-align: center;
+  background-color: transparent;
+}
+
+/* 定休日チェック */
+.checkbox {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1;
+  margin: 0 0 0 6px !important;
+  padding: 0 0 0 6px !important;
+}
+
+/* テーブルのスタイル */
+.businessHoursTable{
+  padding: 2px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tr td{
+  border: 1.5px solid #313131;
+  padding: 0;
+  margin: 0;
+}
+
+.businessHoursTable th{
+  font-size: 14px;
+  padding: 0 4px;
+  border: 1.5px solid #313131;
+}
+
+.businessHoursTable table{
+  border: 1.5px solid #313131;
+  border-collapse: collapse;
+}
+
+.businessHoursTable h2{
+  font-size: 14px;
+  color: #313131;
+  font-weight: bold;
+  border-bottom: 2px solid #333333;
+  margin-right: 70%;
+}
