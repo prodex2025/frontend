@@ -31,7 +31,7 @@ export default function LoginPage() {
           <ApprovalsTextarea name="descrption" id="descrption" text="店舗のメモ"/>
         </div>
         <div className={styles.rightContent}>
-          <ApprovalsInput type="file" name="outsideImg" id="outsideImg" accept="image/*" text="飲食店営業許可証"/>
+          <ApprovalsImg name="outsideImg" id="outsideImg" text="飲食店営業許可証"/>
           <small>
             飲食店営業許可証とは、保健所が発行する飲食店の営業を許可する証明書です。<br />
             サービスのご利用にあたり、食品衛生法に基づく有効な「飲食店営業許可証（写し）」のご提出をお願いしております。<br />
