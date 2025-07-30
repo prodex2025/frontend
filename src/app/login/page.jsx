@@ -1,6 +1,6 @@
 // ユーザーのログイン画面
 // CSSファイルの読み込み
-import styles from '../../styles/approvals.module.css';
+import styles from '@/styles/approvals.module.css';
 
 // コンポーネント読み込み
 import ApprovalsButton from '@/components/atoms/ApprovalsButton';

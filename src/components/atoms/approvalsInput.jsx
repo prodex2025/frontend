@@ -1,8 +1,8 @@
 // ログイン画面・新規登録画面で使うinput
 // CSSファイルを適応
-import styles from '../../styles/approvals.module.css';
+import styles from '@/styles/approvals.module.css';
 
-// 名前・IDは引数で渡す
+// 名前・ID・URL等は引数で渡す
 export default function ApprovalsInput({type,name,id,text}){
   return(
     <div className={styles.inputContent}>

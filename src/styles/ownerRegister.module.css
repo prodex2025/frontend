@@ -1,29 +1,35 @@
 /* cssファイル */
 .div{
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 40%;
   margin: 10vh auto;
   padding: 40px 20px;
-  border: 1.5px solid black;
-  border-radius: 24px;
+  width: 100vw;
   gap: 5px;
 }
 
-.div a{
-  color: #ffc000;
+/* formのスタイル */
+.Form{
+  display: flex;
+  flex-direction: row;
+  flex-basis: 50%;
+  gap: 20px;
 }
 
-/* formのスタイル */
-.loginForm{
+.Form div{
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex-basis: 50%;
   gap: 10px;
+  margin: 10px 10px;
+}
+
+.Form small{
+  color: #6b6b6b;
+  font-size: 10px;
+  padding: 0 12px;
 }
 
 /* h2タブのスタイル */
@@ -33,27 +39,17 @@
   margin-bottom: 15px;
 }
 
-/* ログインボタンのスタイル */
-.loginBtn{
-  border: 1.5px solid #6b6b6b;
-  border-radius: 12px;
-  padding: 1% 5%;
-  color: white;
-  font-weight: bold;
-  background-color: #ffc000;
-  margin-bottom: 10px;
-}
-
 /* 入力欄のスタイル */
-.inputContent {
+.imgContent {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-bottom: 12px;
+  border: 2px solid black;
 }
 
 /* ラベル */
-.inputContent label {
+.imgContent label {
   position: absolute;
   background-color: white;
   padding: 0 3px;
@@ -66,14 +62,13 @@
 
 /* inputタブのスタイル */
 .content{
-  border: 2px solid black;
   padding: 6px 5px;
   font-size: 16px;
   width: 100%;
 }
 
 /* ユーザーIDのスタイル */
-.inputContent .content{
+.imgContent .content{
   background-color: transparent;
 }
 
@@ -83,28 +78,45 @@
   border-color: #ffc000;
 }
 
-.inputContent:has(input:focus) label{
+.imgContent:has(input:focus) label{
   color: #ffc000;
 }
 
-.inputContent:has(textarea:focus) label{
+.imgContent:has(textarea:focus) label{
   color: #ffc000;
 }
 
 /* テキストエリアのスタイル */
-.inputContent textarea{
+.imgContent textarea{
   resize: none;
   padding: 6px 15px;
 }
 
-/*前の画面に戻る為の処理*/
-.backbutton {
+.previewImage{
+  max-width: 100%;
+  max-height: 150px;
+}
+
+.previewContainer{
+  position: relative;
+  display: inline-block;
+  top: -15px;
+}
+
+.previewContainer button{
   position: absolute;
-  top: 8px;
-  left: 20px; 
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  background: none;
+  top: -10px;
+  right: -10px;
+  color: white;
+  background-color: #000000;
   border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 23px;
+  height: 23px;
+  font-size: 16px;
+  line-height: 22px;
+  text-align: center;
+  padding: 0;
+  margin: 0;
 }

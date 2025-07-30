@@ -8,7 +8,7 @@ import styles from '@/styles/approvals.module.css';
 
 // コンポーネント読み込み
 import ApprovalsButton from '@/components/atoms/approvalsButton';
-import ApprovalsInput from '@/components/atoms/approvalsInput';
+import ApprovalsInput from '@/components/atoms/ApprovalsInput';
 
 export default function LoginPage() {
   const router = useRouter();
