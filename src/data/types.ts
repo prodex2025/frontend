@@ -60,3 +60,19 @@ export interface Restaurants_business_hours{
   open_time:number;     // 開店時刻
   close_time:number;    // 閉店時刻
 }
+
+// 店舗の定休日・営業時間テーブル
+// ?は存在しない(undefined)可能性があるためつけています
+export interface Restaurants_business_calendar
+{
+  id:number;            // 主キー
+  restaurant_id:number; // 店舗のID(外部キー)
+  day_of_week:number;   // 0=日, 1=月, ..., 6=土, 7=祝日
+  is_closed:boolean;    // 定休日かどうか
+  lunch_start?:string;   // ランチ開始時刻
+  lunch_end?:string;     // ランチ終了時刻
+  is_lunch_closed:boolean;  //「ランチ営業なし」チェックボックス
+  dinner_start?:string;  // ディナー開始時間
+  dinner_end?:string;    // ディナー終了時間
+  is_dinner_closed:boolean; // 「ディナー営業なし」チェックボックス
+}

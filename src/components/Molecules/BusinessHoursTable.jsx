@@ -7,7 +7,7 @@ import BusinessHourRow from '@/components/Molecules/BusinessHourRow';
 import styles from '@/styles/BusinesRegister.module.css';
 
 const days = [
-  '月', '火', '水', '木', '金', '土', '日', '祝日', '祝前日'
+  '月', '火', '水', '木', '金', '土', '日', '祝日'
 ];
 
 export default function BusinessHoursTable() {
