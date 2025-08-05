@@ -62,6 +62,9 @@ export const restaurants:Restaurants[] = [
     descrption:'おいしいお肉のお店です',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:2,
@@ -74,6 +77,9 @@ export const restaurants:Restaurants[] = [
     descrption:'いい香りがします',
     image_url: '/image/tokyo-deli.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:3,
@@ -86,6 +92,9 @@ export const restaurants:Restaurants[] = [
     descrption:'おいしい三食団子です',
     image_url: '/image/yakiniku.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:4,
@@ -98,6 +107,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:false,
+    approved:true,
   },
   {
     id:5,
@@ -110,6 +122,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:6,
@@ -122,6 +137,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:7,
@@ -134,6 +152,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:8,
@@ -146,6 +167,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:9,
@@ -158,6 +182,9 @@ export const restaurants:Restaurants[] = [
     descrption:'焔（ほむら）',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:10,
@@ -170,6 +197,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:11,
@@ -182,6 +212,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:12,
@@ -194,6 +227,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:true,
+    approved:true,
   },
   {
     id:13,
@@ -206,6 +242,9 @@ export const restaurants:Restaurants[] = [
     descrption:'フワトロ喫茶「雲の上」',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:false,
+    approved:false,
   },
   {
     id:14,
@@ -218,6 +257,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:false,
+    approved:true,
   },
   {
     id:15,
@@ -230,6 +272,9 @@ export const restaurants:Restaurants[] = [
     descrption:'タピオカ',
     image_url: '/image/shop.png',
     image_detail_url:'/image/shop.png',
+    certificate:'/image/certificate.jpg',
+    isPublished:false,
+    approved:false,
   },
   
 ]

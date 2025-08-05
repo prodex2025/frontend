@@ -24,8 +24,11 @@ export interface Restaurants{
   email:string;     // メールアドレス
   owner_id:number;  // 経営者のユーザーID(外部キー)
   descrption:string;// 店舗のメモ
-  image_url: string;
-  image_detail_url: string;
+  image_url: string;// 店舗の写真のurl
+  image_detail_url: string;// 店舗の中の写真のurl
+  certificate:string; // 証明書のurl
+  isPublished:boolean;  // 全体に公開するか判定
+  approved:boolean;     // 証明書の承認判定
 }
 
 // メニュー 
