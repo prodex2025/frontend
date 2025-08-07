@@ -23,12 +23,15 @@ export interface Restaurants{
   phone:string;     // 電話番号
   email:string;     // メールアドレス
   owner_id:number;  // 経営者のユーザーID(外部キー)
-  descrption:string;// 店舗のメモ
+  descrption?:string;// 店舗のメモ
   image_url: string;// 店舗の写真のurl
   image_detail_url: string;// 店舗の中の写真のurl
-  certificate:string; // 証明書のurl
+  certificate?:string; // 証明書のurl
   isPublished:boolean;  // 全体に公開するか判定
   approved:boolean;     // 証明書の承認判定
+  applicationData?:Date; // 証明書の申請日
+  approvalDate?:Date;  // 証明書の承認日
+
 }
 
 // メニュー 
@@ -37,9 +40,9 @@ export interface Dishes {
   restaurant_id: number;  //店舗のID(外部キー)
   name: string;           //名前
   price: number;          //値段
-  description: string;    //メニューのメモ
+  description?: string;    //メニューのメモ
   image_url: string;      //メニューの画像へのアクセスルート
-  video_url: string;      //メニューの3D動画へのアクセスルート
+  video_url?: string;      //メニューの3D動画へのアクセスルート
 }
 
 // カテゴリ―
@@ -78,4 +81,19 @@ export interface Restaurants_business_calendar
   dinner_start?:string;  // ディナー開始時間
   dinner_end?:string;    // ディナー終了時間
   is_dinner_closed:boolean; // 「ディナー営業なし」チェックボックス
+}
+
+// メニューのアレルギー情報テーブル
+export interface Dish_allergy
+{
+  id:number;    // 主キー
+  dish:number;  // メニューのID（外部キー）
+  allergy:number; // アレルギーのID（外部キー） 
+}
+
+// アレルギーテーブル
+export interface Allergy
+{
+  id:number;    // 主キー
+  name:string;  // アレルギーの名前
 }

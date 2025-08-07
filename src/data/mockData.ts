@@ -1,5 +1,5 @@
 // 型のimport
-import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar } from "./types";
+import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar, Dish_allergy, Allergy } from "./types";
 
 // ユーザーの仮データ
 export const users: User[] = [
@@ -65,6 +65,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-01T10:00:00Z'),
+    approvalDate:new Date('2025-08-01T10:00:00Z'),
   },
   {
     id:2,
@@ -80,6 +82,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:3,
@@ -95,6 +99,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:4,
@@ -110,6 +116,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:false,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:5,
@@ -125,6 +133,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:6,
@@ -140,6 +150,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:7,
@@ -155,6 +167,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:8,
@@ -170,6 +184,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:9,
@@ -185,6 +201,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:10,
@@ -200,6 +218,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:11,
@@ -215,6 +235,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:12,
@@ -230,6 +252,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:true,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:13,
@@ -245,6 +269,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:false,
     approved:false,
+    applicationData:undefined,
+    approvalDate:undefined,
   },
   {
     id:14,
@@ -260,6 +286,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:false,
     approved:true,
+    applicationData:new Date('2025-08-02T10:00:00Z'),
+    approvalDate:new Date('2025-08-02T10:00:00Z'),
   },
   {
     id:15,
@@ -275,6 +303,8 @@ export const restaurants:Restaurants[] = [
     certificate:'/image/certificate.jpg',
     isPublished:false,
     approved:false,
+    applicationData:undefined,
+    approvalDate:undefined,
   },
   
 ]
@@ -960,4 +990,60 @@ export const restaurants_business_calendar:Restaurants_business_calendar[] = [
   { id: 118, restaurant_id: 15, day_of_week: 5, is_closed: false, lunch_start: '10:00', lunch_end: '13:30', is_lunch_closed: false, dinner_start: '17:00', dinner_end: '20:30', is_dinner_closed: false },
   { id: 119, restaurant_id: 15, day_of_week: 6, is_closed: false, lunch_start: '10:00', lunch_end: '13:30', is_lunch_closed: false, dinner_start: '17:00', dinner_end: '20:30', is_dinner_closed: false },
   { id: 120, restaurant_id: 15, day_of_week: 7, is_closed: false, lunch_start: '10:00', lunch_end: '13:30', is_lunch_closed: false, dinner_start: '17:00', dinner_end: '20:30', is_dinner_closed: false },
+]
+
+// メニューのアレルギー情報
+export const dish_allergy:Dish_allergy[] = [
+  { id: 1, dish: 1, allergy: 6 },   // ハンバーグ → 卵
+  { id: 2, dish: 1, allergy: 7 },   // ハンバーグ → 乳
+  { id: 3, dish: 1, allergy: 16 },  // ハンバーグ → 牛肉
+  { id: 4, dish: 2, allergy: 4 },   // パスタ → 小麦
+  { id: 5, dish: 2, allergy: 7 },   // パスタ → 乳
+  { id: 6, dish: 3, allergy: 16 },  // ステーキ → 牛肉
+  { id: 7, dish: 4, allergy: 1 },   // パエリア → えび
+  { id: 8, dish: 4, allergy: 2 },   // パエリア → かに
+  { id: 9, dish: 5, allergy: 16 },  // ステーキ → 牛肉
+  { id: 10, dish: 6, allergy: 16 }, // ステーキ → 牛肉
+  { id: 11, dish: 7, allergy: 16 }, // ステーキ → 牛肉
+  { id: 12, dish: 8, allergy: 16 }, // ステーキ → 牛肉
+  { id: 13, dish: 9, allergy: 16 }, // ステーキ → 牛肉
+  { id: 14, dish: 10, allergy: 16 },// ステーキ → 牛肉
+  { id: 15, dish: 11, allergy: 16 },// ステーキ → 牛肉
+  { id: 16, dish: 12, allergy: 16 },// ステーキ → 牛肉
+  { id: 17, dish: 13, allergy: 1 }, // パエリア → えび
+  { id: 18, dish: 14, allergy: 11 },// 刺身盛り合わせ → いか
+  { id: 19, dish: 14, allergy: 18 },// 刺身盛り合わせ → さけ
+  { id: 20, dish: 14, allergy: 12 },// 刺身盛り合わせ → いくら
+]
+
+// アレルギー
+export const allergy:Allergy[] = [
+  {id:1,name:'えび',},
+  {id:2,name:'かに',},
+  {id:3,name:'くるみ',},
+  {id:4,name:'小麦',},
+  {id:5,name:'そば',},
+  {id:6,name:'卵',},
+  {id:7,name:'乳',},
+  {id:8,name:'落花生(ピーナッツ)',},
+  {id:9,name:'アーモンド',},
+  {id:10,name:'あわび',},
+  {id:11,name:'いか',},
+  {id:12,name:'いくら',},
+  {id:13,name:'オレンジ',},
+  {id:14,name:'カシューナッツ',},
+  {id:15,name:'キウイフルーツ',},
+  {id:16,name:'牛肉',},
+  {id:17,name:'ごま',},
+  {id:18,name:'さけ',},
+  {id:19,name:'さば',},
+  {id:20,name:'大豆',},
+  {id:21,name:'鶏肉',},
+  {id:22,name:'バナナ',},
+  {id:23,name:'豚肉',},
+  {id:24,name:'マカダミアナッツ',},
+  {id:25,name:'もも',},
+  {id:26,name:'やまいも',},
+  {id:27,name:'りんご',},
+  {id:28,name:'ゼラチン',},
 ]
