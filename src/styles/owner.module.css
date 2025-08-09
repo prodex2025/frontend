@@ -1,0 +1,29 @@
+.content{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.heder{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 10px;
+  padding: 5px 30px;
+  border-bottom: 2px solid black;
+  width: 90vw;
+}
+
+.heder h1{
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.heder button{
+  background-color: #ffc000;
+  border-radius: 20px;
+  color: white;
+  padding: 3px 10px;
+}

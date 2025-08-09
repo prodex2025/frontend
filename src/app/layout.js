@@ -1,5 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import './globals.css';
+// Leaflet の地図スタイル用CSSをグローバルで読み込み
+// react-leaflet を使う際に必須です
+import 'leaflet/dist/leaflet.css';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

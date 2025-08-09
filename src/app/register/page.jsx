@@ -1,4 +1,4 @@
-//　経営者側の新規登録画面
+//　利用者側の新規登録画面
 // CSSファイルの読み込み
 'use client';
 
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const router = useRouter();
   // 戻るボタンのクリック時に前のページへ戻る関数
    const handleBack = () => {
-    router.push('/login/owner'); 
+    router.push('/login'); 
     console.log("戻るボタン");
   };
   
@@ -26,11 +26,8 @@ export default function LoginPage() {
     <div className={styles.div}>
       <button className={styles.backbutton} onClick={handleBack}>←</button>
       <form className={styles.loginForm}>
-        <h2 className={styles.h2}>経営者新規アカウント登録</h2>
+        <h2 className={styles.h2}>新規アカウント登録</h2>
         
-        {/* ユーザー氏名 */}
-        <ApprovalsInput type="text" name='name' id='name' text="ユーザ氏名"/>
-
         {/* ユーザーID */}
         <ApprovalsInput type="text" name='userId' id='userId' text="ID(半角英数字のみ)"/>
 

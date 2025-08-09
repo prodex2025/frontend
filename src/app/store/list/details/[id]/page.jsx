@@ -1,4 +1,4 @@
-//経営者画面の店舗詳細画面
+//店舗詳細画面
 'use client';
 
 import styles from '@/styles/StoreDetailPage.module.css';
@@ -12,7 +12,6 @@ import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表
 import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
 import StoreDetailTab from '@/components/atoms/StoreDetailTab';     //詳細タブ用コンポーネント
 import StoreMenuTab from '@/components/atoms/StoreMenuTab'; // メニュータブ用コンポーネント
-import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統計情報用コンポーネント
 
 export default function StoreDetailPage() {
 
@@ -50,11 +49,11 @@ export default function StoreDetailPage() {
 
   // 戻るボタンの処理を上書き
   const goBack = () => {
-    router.push(`/owner/dashboard?page=${currentPage}`);  // ページ番号つきで戻る
+    router.push(`/store/list?page=${currentPage}`);  // ページ番号つきで戻る
   };
 
 
-  return (
+   return (
     <div className={styles.wrapper}>
 
     {/* 固定ヘッダー部分 */}
@@ -97,12 +96,6 @@ export default function StoreDetailPage() {
         >
           メニュー
         </button>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'statistics' ? styles.active : ''}`}
-          onClick={() => setActiveTab('statistics')}
-        >
-          統計情報
-        </button>
       </div>
 
     {/* スクロール領域 */}
@@ -110,7 +103,6 @@ export default function StoreDetailPage() {
       {/* ここに画像・地図・レビューなどが入る想定 */}
       {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
       {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
-      {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
     </div>
 
   </div>
