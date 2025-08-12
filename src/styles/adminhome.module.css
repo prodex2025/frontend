@@ -6,10 +6,15 @@
     'opsz' 24;      /* 最適化サイズ */
 }
 
+/* 検索とカテゴリーボタンが入るコンテナ */
+.Barcontainer{
+  display: flex;
+  justify-content: center;      /* 横方向中央揃え */
+  align-items: center;
+}
+
 /* 検索バー */
 .searchBar {
-  display: flex;      /* フレックスボックスで中央寄せ */
-  justify-content: center;      /* 横方向中央揃え */
   margin-bottom: 20px;            /* 下に余白 */
   margin-top: 20px;            /* 下に余白 */
 }
@@ -48,6 +53,16 @@
 /* 検索欄のプレースホルダー（"店舗検索"の文字） */
 .searchWrapper input::placeholder {
   text-align: center;
+}
+
+
+/* カテゴリー編集ボタン */
+.categoriesButton{
+  border: 1.5px solid #999;
+  padding: 5px 20px;            /* 左右に内側余白 */
+  border-radius: 42px;       /* 丸みをつける */
+  margin-left: 5%;
+  cursor: pointer;
 }
 
 
@@ -145,9 +160,16 @@
   background-color: #ffc000; 
 }
 
+/* 表を表示するエリアに対するスタイル */
+.tablearea{
+  display: flex;
+  justify-content: center;      /* 横方向中央揃え */
+}
+
 /* 店舗一覧の表 */
 .storeRequestList{
-    text-align: center;
+  width: 98%;
+  text-align: center;
 }
 
 .storeRequestList th{
@@ -157,4 +179,116 @@
 .storeRequestList tr{
     border: 2px solid #e8e8e8;
     line-height: 40px;
+}
+
+
+/* カテゴリー編集モーダル */
+.BackcategoriesModal {    /* モーダルの背景（半透明の黒） */
+  position: fixed;        /* 画面全体に固定 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
+  display: flex;          /* 中央寄せのためにflex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;           /* 最前面 */
+}
+
+/* モーダル本体 */
+.categoriesModal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  height: 85%;
+  width: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* モーダル内ヘッダー */
+.modalheader{
+  display: flex;
+  justify-content: space-between;   /* 左右端に配置 */
+  padding: 15px 5px;
+  align-items: center;
+}
+
+.title{
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.deleteicon{
+  margin-left: 5%;
+  margin-right: 3%;
+  cursor: pointer;
+}
+
+.closebutton{
+  font-size: 23px;
+  margin-right: 5%;
+  cursor: pointer;
+}
+
+/* カテゴリー追加テキストボックス */
+.addcategories{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  margin: 15px 50px;
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+.addcategories:focus-within{
+  border: 2px solid #ffc000;
+}
+
+.addtextbox{
+  padding: 3px 20px;
+  outline: none;
+}
+
+.addbutton{
+  position: absolute;
+  font-size: 15px;
+  right: 10%;
+  top: 20%;
+  padding: 3px 15px;
+  color: white;
+  background-color: #333;
+  cursor: pointer;
+  border: 1px solid #333;
+  border-radius: 30px;
+}
+
+/* すべてのカテゴリーをまとめて表示 */
+.allcategories{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 1列4つ */
+  gap: 15px; /* アイテム間の余白 */
+  padding: 10px 30px;
+  margin-top: 20px;
+  max-height: 270px;  /* 高さを制限 */
+  overflow-y: auto;   /* 縦方向にスクロール */
+}
+
+.largeFont , .smallFont{
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 15px;
+  color: white;
+  background-color: #ffc000;
+  border: 1px solid #ffc000;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.smallFont{
+  font-size: 12px;
+  
 }

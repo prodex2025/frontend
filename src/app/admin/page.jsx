@@ -17,40 +17,40 @@ export default function Adminhome() {
   //店舗検索用
   const [searchText, setSearchText] = useState('');
 
+  // カテゴリー編集モーダル表示ステータス
+  const [isModalopen,setModalOpen] = useState(false);
+
+  // カテゴリー追加用
+  const[categoriesText,setCategoriesText] = useState('');
+
   // 現在選択されているカテゴリー名の集合（Setで重複なく管理）
   const [selected, setSelected] = useState(new Set());
 
   // setSelectedKindは、状態 （selectedKind） を変更する関数
   const [selectedKind, setSelectedKind] = useState('承認済み');
   
-  // 表のデモデータ
-  const data = {
-    承認済み: [
-      ["サンプル1", "データ1", "項目1", "情報1"],
-      ["サンプル2", "データ2", "項目2", "情報2"],
-    ],
-    未承認: [
-      ["未サンプル1", "未データ1", "", "未情報1"],
-      ["未サンプル2", "未データ2", "", "未情報2"],
-    ],
-    公開済み: [
-      ["公開1", "データ公開1", "項目公開1", "情報公開1"],
-    ],
-    未公開: [
-      ["未公開1", "データ未1", "項目未1", "情報未1"],
-    ]
-  };
-
+  
   return (
     <div className={styles.container}>
       {/* 検索バーとカテゴリー */}
       <header className={styles.fixdHeader}>
-        {/* 検索バー */}
-        <div className={styles.searchBar}>
-          <div className={styles.searchWrapper}>
-            <span className="material-symbols-outlined">search</span>
-            <input type="text" placeholder="店名で検索" value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
+        {/* 検索とカテゴリーボタンが入るコンテナ */}
+        <div className={styles.Barcontainer}>
+          {/* 検索バー */}
+          <div className={styles.searchBar}>
+            <div className={styles.searchWrapper}>
+              <span className="material-symbols-outlined">search</span>
+              <input type="text" placeholder="店名で検索" value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
+            </div>
           </div>
+
+          {/* カテゴリー編集ボタン */}
+          <button
+            className={styles.categoriesButton}
+            onClick={() => setModalOpen(true)}  // クリックでモーダル表示ON
+          >
+            カテゴリー
+          </button>
         </div>
 
         {/* カテゴリータグ + 横スクロール矢印 */}
@@ -83,6 +83,7 @@ export default function Adminhome() {
         </div>
       </header>
 
+      {/* メインのコンテンツを表示するエリア */}
       <div className={styles.main}>
         {/* 表示種類セレクトボックス */}
         <form action="" className={styles.form}>
@@ -99,29 +100,148 @@ export default function Adminhome() {
           </select>
         </form>
 
-        {/* 店舗一覧の表(承認済み・未承認) */}
-        <table className={styles.storeRequestList}>
-          <thead>
-            <tr>
-              <th>店舗名</th>
-              <th>申請者名</th>
-              <th>店舗ページ公開ステータス</th>
-              <th>承認日</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* 配列の中のデータを表で表示 */}
-            {(data[selectedKind] || []).map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cell, colIndex) => (
-                  <td key={colIndex}>{cell ? cell : "ー"}</td>
+        {/* 表を表示するエリア */}
+        <div className={styles.tablearea}>
+          {/* 承認済み店舗一覧を表示 */}
+          {selectedKind === "承認済み" &&(
+            <table className={styles.storeRequestList}>
+              <thead>
+                <tr>
+                  <th>店舗名</th>
+                  <th>申請者名</th>
+                  <th>店舗ページ公開ステータス</th>
+                  <th>承認日</th>
+                </tr>
+              </thead>
+              <tbody>
+                {restaurants
+                .filter(r => r.approved) // 承認済みだけ抽出
+                .map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.name}</td>
+                    <td>{/* 申請者名データが無いため空欄 */}</td>
+                    <td>{r.isPublished ? '公開済み' : '非公開'}</td>
+                    <td>
+                      {/* 承認されている場合は承認日（approvalDate）を表示・承認されていない場合は申請日（applicationData）を表示 */}
+                      {r.approved
+                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP',{
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                        : r.applicationData
+                          ? new Date(r.applicationData).toLocaleDateString('ja-JP',{
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                          : 'ー'
+                      }
+                    </td>
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          )}
 
-        
+          {/* 未承認一覧を表示 */}
+          {selectedKind === "未承認" &&(
+            <table className={styles.storeRequestList}>
+              <thead>
+                <tr>
+                  <th>店舗名</th>
+                  <th>申請者名</th>
+                  <th>店舗ページ公開ステータス</th>
+                  <th>申請日</th>
+                </tr>
+              </thead>
+              <tbody>
+                {restaurants
+                .filter(r =>!r.approved) // 未承認だけ抽出
+                .map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.name}</td>
+                    <td>{/* 申請者名データが無いため空欄 */}</td>
+                    <td>{r.isPublished ? '公開済み' : '非公開'}</td>
+                    <td>
+                      {/* 承認されている場合は承認日（approvalDate）を表示・承認されていない場合は申請日（applicationData）を表示 */}
+                      {r.approved
+                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP',{
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                        : r.applicationData
+                          ? new Date(r.applicationData).toLocaleDateString('ja-JP',{
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                          : 'ー'
+                      }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* 公開済み一覧を表示 */}
+          {selectedKind === "公開済み" &&(
+            <p>test</p>
+          )}
+
+          {/* 未公開一覧を表示 */}
+          {selectedKind === "未公開" &&(
+            <p>test2</p>
+          )}
+        </div>
+
+        {/* カテゴリー編集モーダル */}
+        {isModalopen === true &&(
+          // モーダルの背景
+          <div className={styles.BackcategoriesModal} onClick={() => setModalOpen(false)}>
+            {/* モーダル本体 */}
+            <div className={styles.categoriesModal} onClick={e => e.stopPropagation()}>
+              {/* モーダル内ヘッダー */}
+              <header className={styles.modalheader}>
+                <div className={styles.deleteicon}>
+                  <span className="material-symbols-outlined">delete</span>
+                </div>
+                <p className={styles.title}>カテゴリー</p>
+                <button className={styles.closebutton} onClick={() => setModalOpen(false)}>✖</button>
+              </header>
+              {/* カテゴリー追加テキストボックス */}
+              <div className={styles.addcategories}>
+                <input className={styles.addtextbox} type="text" placeholder='追加したいカテゴリー名' value={categoriesText} onChange={(e) => setCategoriesText(e.target.value)} />
+                <button className={styles.addbutton}>追加</button>
+              </div>
+              {/* すべてのカテゴリーを表示 */}
+              <div className={styles.allcategories}>
+                {categories.map((category)=>(
+                  <label
+                    key={category.id}
+                    className={
+                      category.name.length < 6
+                      ?styles.largeFont
+                      :styles.smallFont
+                    }
+                  >
+                    {category.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
