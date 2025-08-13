@@ -8,6 +8,8 @@
 }
 
 .fixedHeader {
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -15,7 +17,6 @@
   padding: 20px 20px 5px;
   text-align: center;
   color: black;
- 
 }
 
 .scrollArea {
@@ -141,4 +142,40 @@
 .backIcon {
   font-size: 58px !important; /* ← まずは極端に */
   color: black !important;      /* ← 見た目変化を確実にする */
+}
+
+.centerContent{
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+}
+
+.fixedHeaderOwner{
+  display: flex;
+  flex-direction: row;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  padding: 20px 20px 5px;
+  text-align: center;
+  color: black;
+  width: 100vw;
+}
+
+.editBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 1000; /* 必要に応じて他UIの上に */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.edit_square{
+  font-size: 40px !important;
 }
