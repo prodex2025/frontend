@@ -6,7 +6,8 @@ import { useParams } from 'next/navigation';
 import { restaurants, reataurants_categories, categories } from '@/data/mockData';
 
 import ApprovalsInput from "@/components/atoms/approvalsInput";
-import CategoryList from "@/components/Molecules/CategoryList";
+import ApprovalsImg from "@/components/atoms/ApprovalsImg";
+import CategoryList from "@/components/Molecules/CategoryList"
 
 export default function EditStoreForm({onClose}) {
   const params = useParams();
@@ -59,6 +60,9 @@ export default function EditStoreForm({onClose}) {
               value={formData.name}
               onChange={handleChange}
             />
+
+            {/* 店舗の外の写真 */}
+            <ApprovalsImg name="outsideImg" id="outsideImg" text="店外の写真" value={restaurant.image_url}/>
 
             {/* 住所 */}
             <ApprovalsInput
