@@ -16,11 +16,15 @@ import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統�
 import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
 import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
 import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
+import EditDetailTab from '@/components/Molecules/EditDetailTab';
 
 export default function StoreDetailPage() {
 
   //タブ切り替え用
   const [activeTab, setActiveTab] = useState('detail');
+
+  // 編集モードの状態管理
+  const [isEditing, setIsEditing] = useState(false);
 
   // 編集モーダルの開閉状態を管理
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -91,7 +95,7 @@ export default function StoreDetailPage() {
       </div>
       {/* 編集ボタン */}
       <div>
-        <EditButton onClick={() => setEditModalOpen(true)} />
+        <EditButton onClick={() => setEditModalOpen(true)} className={styles.editBtn}/>
       </div>
     </div>
     <div className={styles.divider} /> {/* 区切り線 */}
@@ -101,29 +105,48 @@ export default function StoreDetailPage() {
         <button
           className={`${styles.tabButton} ${activeTab === 'detail' ? styles.active : ''}`}
           onClick={() => setActiveTab('detail')}
+          disabled={isEditing}
         >
           店舗詳細
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === 'menu' ? styles.active : ''}`}
           onClick={() => setActiveTab('menu')}
+          disabled={isEditing}
         >
           メニュー
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === 'statistics' ? styles.active : ''}`}
           onClick={() => setActiveTab('statistics')}
+          disabled={isEditing}
         >
           統計情報
         </button>
+        <div className={styles.editBtnTab}>
+          <EditButton
+            onClick={() => setIsEditing(!isEditing)}
+            icon={isEditing ? 'arrow_back' : 'edit_square'}
+          />
+        </div>
       </div>
 
     {/* スクロール領域 */}
     <div className={styles.scrollArea}>
       {/* ここに画像・地図・レビューなどが入る想定 */}
-      {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
-      {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
-      {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
+      {!isEditing ? (
+        <>
+          {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
+          {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
+          {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
+        </>
+      ):(
+        <>
+          {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
+          {activeTab === 'menu' && <EditStoreForm section="menu" />}
+          {activeTab === 'statistics' && <EditStoreForm section="statistics" />}
+        </>
+      )}
     </div>
     {/* 編集モーダル */}
     <EditStoreModal open={editModalOpen} onClose={() => setEditModalOpen(false)}>

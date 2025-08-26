@@ -176,6 +176,14 @@
   transition: background-color 0.2s ease;
 }
 
+.editBtnTab{
+  padding: 12px;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+}
+
 .edit_square{
   font-size: 40px !important;
+  color: black !important;  
 }

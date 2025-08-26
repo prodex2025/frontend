@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import styles from "@/styles/editModal.module.css";
 
 import { useParams } from 'next/navigation';
-import { restaurants, reataurants_categories, categories } from '@/data/mockData';
+import { restaurants, reataurants_categories } from '@/data/mockData';
 
 import ApprovalsInput from "@/components/atoms/approvalsInput";
 import ApprovalsImg from "@/components/atoms/ApprovalsImg";
-import CategoryList from "@/components/Molecules/CategoryList"
+import CategoryList from "@/components/Molecules/CategoryList";
 
-export default function EditStoreForm({onClose}) {
+export default function EditStoreForm({ onClose }) {
   const params = useParams();
   const restaurantId = parseInt(params.id, 10);
   const restaurant = restaurants.find(r => r.id === restaurantId);
@@ -23,17 +23,23 @@ export default function EditStoreForm({onClose}) {
     .filter(rc => rc.restaurant_id === restaurantId)
     .map(rc => rc.category_id);
 
-  // 編集フォームの状態管理
+  // 編集フォームの状態管理（モックデータコピー）
   const [formData, setFormData] = useState({
     name: restaurant.name,
     address: restaurant.address,
     categories: relatedCategoryIds || [],
+    image_url: restaurant.image_url || null,
   });
 
   // 入力変更
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // 画像変更
+  const handleImageChange = (newImageUrl) => {
+    setFormData(prev => ({ ...prev, image_url: newImageUrl }));
   };
 
   // 保存（フロントエンドのみ）
@@ -62,7 +68,13 @@ export default function EditStoreForm({onClose}) {
             />
 
             {/* 店舗の外の写真 */}
-            <ApprovalsImg name="outsideImg" id="outsideImg" text="店外の写真" value={restaurant.image_url}/>
+            <ApprovalsImg
+              name="outsideImg"
+              id="outsideImg"
+              text="店外の写真"
+              value={formData.image_url}
+              onChange={handleImageChange} // ここで更新
+            />
 
             {/* 住所 */}
             <ApprovalsInput
@@ -79,7 +91,9 @@ export default function EditStoreForm({onClose}) {
             <h3 className={styles.h3}>カテゴリー一覧</h3>
             <CategoryList
               selectedCategories={formData.categories}
-              setSelectedCategories={(newCats) => setFormData(prev => ({ ...prev, categories: newCats }))}
+              setSelectedCategories={(newCats) =>
+                setFormData(prev => ({ ...prev, categories: newCats }))
+              }
             />
           </div>
         </div>
