@@ -1,5 +1,5 @@
 // 型のimport
-import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar, Dish_allergy, Allergy } from "./types";
+import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar, Dish_allergy, Allergy, RestaurantAccessLog, MenuAccessLog, PopularMenu, StoreStatistics } from "./types";
 
 // ユーザーの仮データ
 export const users: User[] = [
@@ -1047,3 +1047,40 @@ export const allergy:Allergy[] = [
   {id:27,name:'りんご',},
   {id:28,name:'ゼラチン',},
 ]
+
+// 店舗アクセス履歴
+export const restaurantAccessLogs: RestaurantAccessLog[] = [
+  { restaurant_id: 1, date: '2025-08-25', count: 35 },
+  { restaurant_id: 1, date: '2025-08-26', count: 42 },
+  { restaurant_id: 1, date: '2025-08-27', count: 50 },
+  { restaurant_id: 2, date: '2025-08-25', count: 20 },
+  { restaurant_id: 2, date: '2025-08-26', count: 25 },
+  { restaurant_id: 3, date: '2025-08-25', count: 15 },
+];
+
+// メニューアクセス履歴
+export const menuAccessLogs: MenuAccessLog[] = [
+  { restaurant_id: 1, dish_id: 1, date: '2025-08-25', count: 10 },
+  { restaurant_id: 1, dish_id: 2, date: '2025-08-25', count: 5 },
+  { restaurant_id: 1, dish_id: 13, date: '2025-08-26', count: 7 },
+  { restaurant_id: 1, dish_id: 14, date: '2025-08-27', count: 12 },
+  { restaurant_id: 2, dish_id: 4, date: '2025-08-25', count: 3 },
+  { restaurant_id: 2, dish_id: 5, date: '2025-08-25', count: 2 },
+  { restaurant_id: 3, dish_id: 7, date: '2025-08-26', count: 4 },
+];
+
+// 人気メニューランキング
+export const popularMenus: PopularMenu[] = [
+  { restaurant_id: 1, dish_id: 14, total_count: 25 },
+  { restaurant_id: 1, dish_id: 1, total_count: 22 },
+  { restaurant_id: 1, dish_id: 13, total_count: 15 },
+  { restaurant_id: 2, dish_id: 4, total_count: 10 },
+  { restaurant_id: 3, dish_id: 7, total_count: 8 },
+];
+
+// 数値集計
+export const storeStatistics: StoreStatistics[] = [
+  { restaurant_id: 1, total_restaurant_access: 127, total_menu_access: 59, total_dishes: 6 },
+  { restaurant_id: 2, total_restaurant_access: 45, total_menu_access: 5, total_dishes: 3 },
+  { restaurant_id: 3, total_restaurant_access: 15, total_menu_access: 4, total_dishes: 3 },
+];

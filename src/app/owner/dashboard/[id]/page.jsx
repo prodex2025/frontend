@@ -123,12 +123,14 @@ export default function StoreDetailPage() {
         >
           統計情報
         </button>
+        {activeTab !== 'statistics' && (
         <div className={styles.editBtnTab}>
-          <EditButton
-            onClick={() => setIsEditing(!isEditing)}
-            icon={isEditing ? 'arrow_back' : 'edit_square'}
-          />
-        </div>
+            <EditButton
+              onClick={() => setIsEditing(!isEditing)}
+              icon={isEditing ? 'arrow_back' : 'edit_square'}
+            />
+          </div>
+        )}
       </div>
 
     {/* スクロール領域 */}
@@ -144,7 +146,6 @@ export default function StoreDetailPage() {
         <>
           {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
           {activeTab === 'menu' && <EditStoreForm section="menu" />}
-          {activeTab === 'statistics' && <EditStoreForm section="statistics" />}
         </>
       )}
     </div>
