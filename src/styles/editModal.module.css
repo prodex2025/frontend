@@ -91,8 +91,14 @@
   padding: 1px 2px;
 }
 
-
 .selected {
   background-color: #ffd700;
   color: #fff;
+}
+
+.hoursContent{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-basis: 100%;
 }

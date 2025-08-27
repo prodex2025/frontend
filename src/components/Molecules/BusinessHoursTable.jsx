@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import BusinessHourRow from '@/components/Molecules/BusinessHourRow';
 
 // cssのインポート
@@ -10,15 +9,7 @@ const days = [
   '月', '火', '水', '木', '金', '土', '日', '祝日'
 ];
 
-export default function BusinessHoursTable() {
-  // 営業時間情報の初期化
-  const [hours, setHours] = useState(
-    days.map(() => ({
-      closed: false,
-      lunch: { start: '', end: '', available: false },
-      dinner: { start: '', end: '', available: false },
-    }))
-  );
+export default function BusinessHoursTable({ hours, setHours }) {
 
   const updateRow = (index, newData) => {
     const updated = [...hours];

@@ -4,6 +4,8 @@ import styles from '@/styles/EditPage.module.css';
 import { restaurants_business_calendar } from '@/data/mockData'; 
 
 import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
+import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
+import EditBusinessHoursForm from "@/components/Molecules/EditBusinessHoursForm";
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土', '祝日'];
 
@@ -29,6 +31,13 @@ export default function EditDetailTab({ restaurant }) {
   const [previewUrl, setPreviewUrl] = useState(restaurant.image_detail_url);
   const fileInputRef = useRef(null);
 
+  // 編集モーダルの開閉状態を管理
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const [businessHours, setBusinessHours] = useState(
+    restaurants_business_calendar.filter((b) => b.restaurant_id === restaurant.id)
+  );
+
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) setPreviewUrl(URL.createObjectURL(file));
@@ -40,12 +49,10 @@ export default function EditDetailTab({ restaurant }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const businessHours = restaurants_business_calendar.filter(
-    (b) => b.restaurant_id === restaurant.id
-  );
   const weekdayMap = Object.fromEntries(businessHours.map((b) => [b.day_of_week, b]));
 
   return (
+    <>
     <form className={styles.form}>
       <div className={styles.container}>
         {/* 左：画像 */}
@@ -79,7 +86,7 @@ export default function EditDetailTab({ restaurant }) {
                   ))}
                 </td>
                 <td>
-                  <EditButton onClick={() => setEditingField('businessHours')} icon='edit' />
+                  <EditButton onClick={() => setEditModalOpen(true)} icon="edit" />
                 </td>
               </tr>
 
@@ -151,5 +158,10 @@ export default function EditDetailTab({ restaurant }) {
         <button type="submit" className={styles.submitBtn}>登録</button>
       </div>
     </form>
+    {/* 編集モーダル */}
+    <EditStoreModal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+      <EditBusinessHoursForm onClose={() => setEditModalOpen(false)} />
+    </EditStoreModal>
+    </>
   );
 }
