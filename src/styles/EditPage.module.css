@@ -1,0 +1,132 @@
+/*店舗詳細タブ内ののｃｓｓ*/
+.form{
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;         /* 横並びにする */
+  width: 100%; 
+  align-items: flex-start;
+  flex-wrap: wrap;       /* 画面が狭い時は縦並びになるように */
+}
+
+.imageWrapper {
+  flex: 2.2;               /* 左側エリア */
+  width: 80%;
+  margin-left: 48px; /* ← ここで左側の余白を増やす */
+  margin-right: 120px;
+  display: flex;
+  flex-direction: column;  /* 縦に並べる */
+}
+
+.detailImage {
+  width: 100%;
+  height: 360px;  
+  object-fit: cover;
+  max-width: none; 
+}
+
+.contentWrapper {
+  flex: 2;               /* 右側のコンテンツ用（仮） */
+  min-width: 240px;
+}
+
+/* 右側の情報 */
+.description {
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.infoBlock p {
+  margin: 4px 0;
+  font-size: 50px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5em;
+  white-space: pre-wrap;
+  font-size: 25px; /* ← ここで全体の行の文字サイズを大きく！ */
+}
+
+.label {
+  display: inline-block;
+  min-width: 5.4em; /* これでラベル幅統一 */
+  font-weight: bold;
+}
+
+.value {
+  white-space: normal; /* 普通の空白と改行を有効に */
+}
+
+.imgContent{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.h2{
+  color: rgb(43, 43, 43);
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.p{
+  color: rgb(41, 41, 41);
+  font-size: 14px;
+}
+
+.submitBtn{
+  display: inline-block; 
+  background-color: rgb(126, 126, 126);
+  color: white;
+  border-radius: 14px;
+  padding: 2px 36px;
+}
+
+.footerContent{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.infoTable input{
+  width: 100%;
+}
+
+/* 編集中の行全体 */
+.editingRow {
+  border-bottom: 2px solid #ffd700; /* 下線 */
+}
+
+/* 小画面用：レスポンシブ対応 */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  .imageWrapper {
+    margin-left: 0;
+    flex: unset;
+    width: 100%;
+  }
+
+  .detailImage {
+    height: auto;
+  }
+
+  .contentWrapper {
+    width: 100%;
+  }
+}

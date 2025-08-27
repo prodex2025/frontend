@@ -13,11 +13,21 @@ import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータ�
 import StoreDetailTab from '@/components/atoms/StoreDetailTab';     //詳細タブ用コンポーネント
 import StoreMenuTab from '@/components/atoms/StoreMenuTab'; // メニュータブ用コンポーネント
 import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統計情報用コンポーネント
+import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
+import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
+import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
+import EditDetailTab from '@/components/Molecules/EditDetailTab';
 
 export default function StoreDetailPage() {
 
   //タブ切り替え用
   const [activeTab, setActiveTab] = useState('detail');
+
+  // 編集モードの状態管理
+  const [isEditing, setIsEditing] = useState(false);
+
+  // 編集モーダルの開閉状態を管理
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   // URLのパラメータ（/store/list/details/3 → id = "3"）を取得
   const params = useParams();
@@ -56,63 +66,92 @@ export default function StoreDetailPage() {
 
   return (
     <div className={styles.wrapper}>
-
-    {/* 固定ヘッダー部分 */}
-    <div className={styles.backButton} onClick={() => window.history.back()}>
-      <span className={`material-symbols-outlined ${styles.backIcon}`}>arrow_back</span>
-    </div>
-    <div className={styles.fixedHeader}>
-      <h1 className={styles.title}>{restaurant.name}</h1>
-
-      <p className={styles.address}>
-        <a
-          href={`https://www.google.com/maps/search/?q=${restaurant.address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {restaurant.address}
-        </a>
-      </p>
-
-      <div className={styles.categoryContainer}>
-        {relatedCategories.map((category, index) => (
-          <CategoryTag key={index} label={category} selected={true} />
-        ))}
+      {/* 固定ヘッダー部分 */}
+      <div className={styles.fixedHeaderOwner}>
+        {/* 戻るボタン */}
+        <div className={styles.backButton} onClick={() => window.history.back()}>
+          <span className={`material-symbols-outlined ${styles.backIcon}`}>arrow_back</span>
+        </div>
+        {/* 真ん中のコンテンツ */}
+        <div className={styles.centerContent}>
+          {/* タイトル */}
+          <h1 className={styles.title}>{restaurant.name}</h1>
+          {/* 住所 */}
+          <p className={styles.address}>
+            <a
+              href={`https://www.google.com/maps/search/?q=${restaurant.address}`}
+            target="_blank"
+              rel="noopener noreferrer"
+            >
+              {restaurant.address}
+            </a>
+          </p>
+          {/* カテゴリ― */}
+        <div className={styles.categoryContainer}>
+          {relatedCategories.map((category, index) => (
+            <CategoryTag key={index} label={category} selected={true} />
+          ))}
+        </div>
       </div>
-
-      <div className={styles.divider} /> {/* 区切り線 */}
+      {/* 編集ボタン */}
+      <div>
+        <EditButton onClick={() => setEditModalOpen(true)} className={styles.editBtn}/>
+      </div>
     </div>
+    <div className={styles.divider} /> {/* 区切り線 */}
 
     {/* タブの切り替えUI */}
       <div className={styles.tabContainer}>
         <button
           className={`${styles.tabButton} ${activeTab === 'detail' ? styles.active : ''}`}
           onClick={() => setActiveTab('detail')}
+          disabled={isEditing}
         >
           店舗詳細
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === 'menu' ? styles.active : ''}`}
           onClick={() => setActiveTab('menu')}
+          disabled={isEditing}
         >
           メニュー
         </button>
         <button
           className={`${styles.tabButton} ${activeTab === 'statistics' ? styles.active : ''}`}
           onClick={() => setActiveTab('statistics')}
+          disabled={isEditing}
         >
           統計情報
         </button>
+        <div className={styles.editBtnTab}>
+          <EditButton
+            onClick={() => setIsEditing(!isEditing)}
+            icon={isEditing ? 'arrow_back' : 'edit_square'}
+          />
+        </div>
       </div>
 
     {/* スクロール領域 */}
     <div className={styles.scrollArea}>
       {/* ここに画像・地図・レビューなどが入る想定 */}
-      {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
-      {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
-      {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
+      {!isEditing ? (
+        <>
+          {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
+          {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
+          {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
+        </>
+      ):(
+        <>
+          {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
+          {activeTab === 'menu' && <EditStoreForm section="menu" />}
+          {activeTab === 'statistics' && <EditStoreForm section="statistics" />}
+        </>
+      )}
     </div>
-
+    {/* 編集モーダル */}
+    <EditStoreModal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+      <EditStoreForm onClose={() => setEditModalOpen(false)} />
+    </EditStoreModal>
   </div>
     
   );
