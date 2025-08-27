@@ -26,8 +26,11 @@ export default function LoginPage() {
     <div className={styles.div}>
       <button className={styles.backbutton} onClick={handleBack}>←</button>
       <form className={styles.loginForm}>
-        <h2 className={styles.h2}>新規アカウント登録</h2>
+        <h2 className={styles.h2}>管理者新規アカウント登録</h2>
         
+       
+        {/* ユーザー氏名 */}
+        <ApprovalsInput type="text" name='name' id='name' text="ユーザ氏名"/>
        
         {/* ユーザーID */}
         <ApprovalsInput type="text" name='userId' id='userId' text="ID(半角英数字のみ)"/>
