@@ -97,3 +97,33 @@ export interface Allergy
   id:number;    // 主キー
   name:string;  // アレルギーの名前
 }
+
+// 店舗アクセス履歴（日別カウント）
+export interface RestaurantAccessLog {
+  restaurant_id: number;
+  date: string;     // 'YYYY-MM-DD'形式
+  count: number;    // その日のアクセス数
+}
+
+// メニューアクセス履歴（日別カウント）
+export interface MenuAccessLog {
+  restaurant_id: number;
+  dish_id: number;
+  date: string;     // 'YYYY-MM-DD'形式
+  count: number;    // その日のアクセス数
+}
+
+// 人気メニューランキング用
+export interface PopularMenu {
+  restaurant_id: number;
+  dish_id: number;
+  total_count: number;  // 累計クリック数
+}
+
+// 数値集計（数字だけ表示用）
+export interface StoreStatistics {
+  restaurant_id: number;
+  total_restaurant_access: number;
+  total_menu_access: number;
+  total_dishes: number;
+}
