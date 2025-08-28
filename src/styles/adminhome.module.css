@@ -166,7 +166,7 @@
   justify-content: center;      /* 横方向中央揃え */
 }
 
-/* 店舗一覧の表 */
+/* 店舗一覧の表 （承認）*/
 .storeRequestList{
   width: 98%;
   text-align: center;
@@ -181,6 +181,129 @@
     line-height: 40px;
 }
 
+.requeststore{
+  cursor: pointer;
+}
+
+.requeststore:hover{
+  outline: 2px solid #ffd700; /* 外枠の色と太さ */
+}
+
+/* 店舗一覧の表（公開） */
+.visibleshops{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4列にする */
+  gap: 25px;
+  margin: 10px 40px;
+}
+
+.visibleshop{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #cfcfcf;
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+}
+
+.visibleshop:hover{
+  transform: translateY(-3px);
+  box-shadow:
+    5px 5px 10px #A6B4C8,     /* 内側の影（左上） */
+    -5px -5px 15px #ffffff;  /* 内側の影（右下） */
+}
+
+.storephoto{
+  width: 230px;
+  height: 130px;
+}
+
+.storedetail{
+  width: 230px;   /* 横幅を固定 */
+  height: 127px;  /* 高さを固定 */
+  box-sizing: border-box; /* padding込みでサイズ計算 */
+}
+
+.openContent{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 5px 0px 10px;
+  gap: 5px;
+}
+
+.privatebutton{
+  color: #c52a3f;
+  font-weight: bold;
+}
+
+.privatebutton:hover{
+  color: red;
+}
+
+.publicbutton{
+  color: #2a46c5;
+  font-weight: bold;
+}
+
+.publicbutton:hover{
+  color: blue;
+}
+
+.smalltext{
+  font-size: 15px;
+  text-decoration-line:underline;
+}
+
+.smalltext:hover{
+  color:#0049a9;
+}
+
+.closedContent{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 5px;
+  gap: 5px;
+}
+
+.storecategory{
+  font-size: 15px;
+}
+
+.displaychange{
+  position: absolute;
+  right: 10px;
+  bottom: 105px;
+  cursor: pointer;
+}
+
+.displaychange:hover{
+  background-color: #ccc;
+  border-radius: 50px;
+}
+
+.storename{
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.storeadress{
+  font-size: 15px;
+}
+
+
+.nothing{ /* 該当する店舗がない場合の表示 */
+  padding: 3%;
+  font-size: 120%;
+  font-weight: bold;
+}
 
 /* カテゴリー編集モーダル */
 .BackcategoriesModal {    /* モーダルの背景（半透明の黒） */
@@ -290,5 +413,58 @@
 
 .smallFont{
   font-size: 12px;
-  
+}
+
+/* 公開確認モーダル本体 */
+.publicModal , .privateModal{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  height: 30%;
+  min-width: 30%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.BackpublicModal{
+  position: fixed;        /* 画面全体に固定 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
+  display: flex;          /* 中央寄せのためにflex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;           /* 最前面 */
+}
+
+.choicestore{
+  font-size: 20px;
+}
+
+.controlbutton{
+  display: flex;
+  gap: 20px;
+}
+
+.public{
+  width: 130px;
+  height: 40px;
+  font-size: 17px;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  border: 1.5px solid #999;
+  border-radius:8px;
+}
+
+.OK{
+  background-color: #ffc000;
+  color: white;
 }

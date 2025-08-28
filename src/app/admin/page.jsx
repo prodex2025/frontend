@@ -2,20 +2,23 @@
 'use client'; // ← クライアントコンポーネントであることを明示（Next.js）
 
 // useStateを使うために読み込み
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 // このページ専用のCSSファイルの読み込み
 import styles from '@/styles/adminhome.module.css';
 
 //コンポーネントのインポート
 import CategoryTag from '@/components/atoms/CategoryTag.jsx';       // カテゴリー用の再利用コンポーネント
 
-// 仮のデータセットをインポート（店舗・カテゴリ・関連テーブル）
+// 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
 import { restaurants, categories, reataurants_categories } from '@/data/mockData';
+import { style } from '@mui/system';
 
 
 export default function Adminhome() {
   //店舗検索用
   const [searchText, setSearchText] = useState('');
+  // 検索結果絞り込まれたデータを保存
+  const [filteredShops, setFilteredShops] = useState(restaurants);
 
   // カテゴリー編集モーダル表示ステータス
   const [isModalopen,setModalOpen] = useState(false);
@@ -28,8 +31,29 @@ export default function Adminhome() {
 
   // setSelectedKindは、状態 （selectedKind） を変更する関数
   const [selectedKind, setSelectedKind] = useState('承認済み');
+
+  // 公開・非公開storedetail表示切替用
+  const [openId,setOpenId] = useState(null);
+
+  // 非公開確認モーダル
+  const [privateModal, setPrivateModal] = useState(false);
   
-  
+  // 公開確認モーダル
+  const [publicModal, setPublicModal] = useState(false);
+
+  // storedetailの表示を切り替えている店舗を探す
+  const openShop = filteredShops.find(r => r.id === openId);
+
+  // ＝＝＝＝＝＝＝＝＝＝関数＝＝＝＝＝＝＝＝＝＝＝
+  // 検索バーの処理
+  useEffect(() => {
+    const filtered = restaurants.filter(r =>
+      r.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredShops(filtered);
+  },[searchText]);
+
+
   return (
     <div className={styles.container}>
       {/* 検索バーとカテゴリー */}
@@ -68,8 +92,8 @@ export default function Adminhome() {
                 <CategoryTag
                   key={category.id}    // React のキー
                   label={category.name}    // 表示名
-                  // selected={selected.has(category.name)}    // 選択状態を判定
-                  // onClick={() => toggleCategory(category.name)}    // クリック時の処理
+                  //selected={selected.has(category.name)}    // 選択状態を判定
+                  //onClick={() => toggleCategory(category.name)}    // クリック時の処理
                   className={styles.filterButton}                  // スタイル指定
                 />
               ))}
@@ -96,14 +120,15 @@ export default function Adminhome() {
             <option className={styles.kindItem} value="承認済み">承認済み</option>
             <option className={styles.kindItem} value="未承認">未承認</option>
             <option className={styles.kindItem} value="公開済み">公開済み</option>
-            <option className={styles.kindItem} value="未公開">未公開</option>
+            <option className={styles.kindItem} value="非公開">非公開</option>
           </select>
         </form>
 
         {/* 表を表示するエリア */}
         <div className={styles.tablearea}>
-          {/* 承認済み店舗一覧を表示 */}
-          {selectedKind === "承認済み" &&(
+          {/* 承認済み店舗一覧 */}
+          {selectedKind === "承認済み" && (
+            filteredShops.length > 0 ? (
             <table className={styles.storeRequestList}>
               <thead>
                 <tr>
@@ -114,42 +139,45 @@ export default function Adminhome() {
                 </tr>
               </thead>
               <tbody>
-                {restaurants
-                .filter(r => r.approved) // 承認済みだけ抽出
+                {filteredShops
+                .filter(r => r.approved) // 承認済みのみ表示
                 .map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id} className={styles.requeststore}>
                     <td>{r.name}</td>
-                    <td>{/* 申請者名データが無いため空欄 */}</td>
+                    <td>{/* 申請者名 */}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
                     <td>
-                      {/* 承認されている場合は承認日（approvalDate）を表示・承認されていない場合は申請日（applicationData）を表示 */}
                       {r.approved
-                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP',{
+                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP', {
                           year: 'numeric',
                           month: '2-digit',
                           day: '2-digit',
                           hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                        : r.applicationData
-                          ? new Date(r.applicationData).toLocaleDateString('ja-JP',{
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
+                          minute: '2-digit',
                           })
-                          : 'ー'
-                      }
+                        : r.applicationData
+                        ? new Date(r.applicationData).toLocaleDateString('ja-JP', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          })
+                        : 'ー'}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          ) : (
+            <p className={styles.nothing}>該当する店舗はありません</p>
+            )
           )}
+          
 
           {/* 未承認一覧を表示 */}
-          {selectedKind === "未承認" &&(
+          {selectedKind === "未承認" && (
+            filteredShops.length > 0 ? (
             <table className={styles.storeRequestList}>
               <thead>
                 <tr>
@@ -160,48 +188,191 @@ export default function Adminhome() {
                 </tr>
               </thead>
               <tbody>
-                {restaurants
-                .filter(r =>!r.approved) // 未承認だけ抽出
+                {filteredShops
+                .filter(r => !r.approved) // 承認済みのみ表示
                 .map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id} className={styles.requeststore}>
                     <td>{r.name}</td>
-                    <td>{/* 申請者名データが無いため空欄 */}</td>
+                    <td>{/* 申請者名 */}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
                     <td>
-                      {/* 承認されている場合は承認日（approvalDate）を表示・承認されていない場合は申請日（applicationData）を表示 */}
                       {r.approved
-                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP',{
+                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP', {
                           year: 'numeric',
                           month: '2-digit',
                           day: '2-digit',
                           hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                        : r.applicationData
-                          ? new Date(r.applicationData).toLocaleDateString('ja-JP',{
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
+                          minute: '2-digit',
                           })
-                          : 'ー'
-                      }
+                        : r.applicationData
+                        ? new Date(r.applicationData).toLocaleDateString('ja-JP', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          })
+                        : 'ー'}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          ) : (
+            <p className={styles.nothing}>該当する店舗はありません</p>
+            )
           )}
 
           {/* 公開済み一覧を表示 */}
           {selectedKind === "公開済み" &&(
-            <p>test</p>
+            <div className={styles.visibleshops}>
+            {filteredShops.length > 0 ? (
+                filteredShops
+                .filter(r => r.isPublished) // 公開済みのみ表示
+                .map((r) => (
+                  <div className={styles.visibleshop}>
+                    {/* 店舗の写真 */}
+                    <img
+                      src={r.image_url}
+                      alt={r.name}
+                      className={styles.storephoto}
+                    />
+                    {/* 店舗の情報（簡易） */}
+                    <div className={styles.storedetail + (openId === r.id ? `${styles.open}` : "")}>
+                      {openId === r.id ? (
+                        // 展開時に見せたい内容
+                        <div className={styles.openContent}>
+                          <p className={styles.storename}>
+                          {/* ９文字以上の店舗名を開業する処理 */}
+                            {r.name.length > 8
+                              ? (
+                                <>
+                                  {r.name.slice(0, 8)}<br />
+                                  {r.name.slice(8)}
+                                </>
+                              )
+                              : r.name
+                            }
+                          </p>
+                          <p className={styles.privatebutton} onClick={() => setPrivateModal(true)}>非公開にする</p>
+                          <a href="" className={styles.smalltext}>この店舗の詳細ページへ</a>
+                        </div>
+                      ) : (
+                        // 閉じているときに見せたい内容
+                        <div className={styles.closedContent}>
+                          <p className={styles.storename}>
+                          {/* ９文字以上の店舗名を開業する処理 */}
+                            {r.name.length > 8
+                              ? (
+                                <>
+                                  {r.name.slice(0, 8)}<br />
+                                  {r.name.slice(8)}
+                                </>
+                              )
+                              : r.name
+                            }
+                          </p>
+                          <p className={styles.storeadress}>{r.address}</p>
+                          {/* 店舗ごとのカテゴリーを表示 */}
+                          <p  className={styles.storecategory}>
+                            {reataurants_categories
+                              .filter(rc => rc.restaurant_id === r.id)
+                              .map(rc => categories.find(c => c.id === rc.category_id) ?.name ?? "不明")
+                              .join("/")
+                            }
+                          </p>
+                        </div>
+                      )}
+                      
+                      <span
+                        className={`material-symbols-outlined ${styles.displaychange}`}
+                        onClick={() => setOpenId(openId === r.id ? null : r.id)}
+                      >
+                      more_vert
+                      </span>
+                    </div>
+                  </div>
+                ))
+          ) : (
+            <p className={styles.nothing}>該当する店舗はありません</p>
+            )}
+            </div>
           )}
 
-          {/* 未公開一覧を表示 */}
-          {selectedKind === "未公開" &&(
-            <p>test2</p>
+          {/* 非公開一覧を表示 */}
+          {selectedKind === "非公開" &&(
+            <div className={styles.visibleshops}>
+            {filteredShops.length > 0 ? (
+                filteredShops
+                .filter(r => !r.isPublished) // 公開済みのみ表示
+                .map((r) => (
+                  <div key={r.id} className={styles.visibleshop}>
+                    {/* 店舗の写真 */}
+                    <img
+                      src={r.image_url}
+                      alt={r.name}
+                      className={styles.storephoto}
+                    />
+                    {/* 店舗の情報（簡易） */}
+                    <div className={styles.storedetail + (openId === r.id ? `${styles.open}` : "")}>
+                      {openId === r.id ? (
+                        // 展開時に見せたい内容
+                        <div className={styles.openContent}>
+                          <p className={styles.storename}>
+                          {/* ９文字以上の店舗名を開業する処理 */}
+                            {r.name.length > 8
+                              ? (
+                                <>
+                                  {r.name.slice(0, 8)}<br />
+                                  {r.name.slice(8)}
+                                </>
+                              )
+                              : r.name
+                            }
+                          </p>
+                          <p className={styles.publicbutton} onClick={() => setPublicModal(true)}>公開する</p>
+                          <a href="" className={styles.smalltext}>この店舗の詳細ページへ</a>
+                        </div>
+                      ) : (
+                        // 閉じているときに見せたい内容
+                        <div className={styles.closedContent}>
+                          <p className={styles.storename}>
+                          {/* ９文字以上の店舗名を開業する処理 */}
+                            {r.name.length > 8
+                              ? (
+                                <>
+                                  {r.name.slice(0, 8)}<br />
+                                  {r.name.slice(8)}
+                                </>
+                              )
+                              : r.name
+                            }
+                          </p>
+                          <p className={styles.storeadress}>{r.address}</p>
+                          {/* 店舗ごとのカテゴリーを表示 */}
+                          <p  className={styles.storecategory}>
+                            {reataurants_categories
+                              .filter(rc => rc.restaurant_id === r.id)
+                              .map(rc => categories.find(c => c.id === rc.category_id) ?.name ?? "不明")
+                              .join("/")
+                            }
+                          </p>
+                        </div>
+                      )}
+                      
+                      <span
+                        className={`material-symbols-outlined ${styles.displaychange}`}
+                        onClick={() => setOpenId(openId === r.id ? null : r.id)}
+                      >
+                      more_vert
+                      </span>
+                    </div>
+                  </div>
+                ))
+          ) : (
+            <p className={styles.nothing}>該当する店舗はありません</p>
+            )}
+            </div>
           )}
         </div>
 
@@ -238,6 +409,33 @@ export default function Adminhome() {
                     {category.name}
                   </label>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* 公開確認モーダル */}
+        {publicModal === true &&(
+          <div className={styles.BackpublicModal}  onClick={() => setPublicModal(false)}>
+            <div className={styles.publicModal}>
+              <p className={styles.choicestore}>{openShop ? openShop.name : "Noname"} を<strong>公開</strong>しますか</p>
+              <div className={styles.controlbutton}>
+                <p className={`${styles.public} ${styles.OK}`}>OK</p>
+                <p className={styles.public} onClick={() => setPublicModal(false)}>キャンセル</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 非公開確認モーダル */}
+        {privateModal === true &&(
+          <div className={styles.BackpublicModal}  onClick={() => setPrivateModal(false)}>
+            <div className={styles.publicModal}>
+              <p className={styles.choicestore}>{openShop ? openShop.name : "Noname"} を<strong>非公開</strong>にしますか</p>
+              <div className={styles.controlbutton}>
+                <p className={`${styles.public} ${styles.OK}`}>OK</p>
+                <p className={styles.public} onClick={() => setPrivateModal(false)}>キャンセル</p>
               </div>
             </div>
           </div>
