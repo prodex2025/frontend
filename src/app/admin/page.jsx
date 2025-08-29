@@ -10,7 +10,7 @@ import styles from '@/styles/adminhome.module.css';
 import CategoryTag from '@/components/atoms/CategoryTag.jsx';       // カテゴリー用の再利用コンポーネント
 
 // 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
-import { restaurants, categories, reataurants_categories } from '@/data/mockData';
+import { restaurants, categories, reataurants_categories ,users} from '@/data/mockData';
 import { style } from '@mui/system';
 
 
@@ -141,10 +141,14 @@ export default function Adminhome() {
               <tbody>
                 {filteredShops
                 .filter(r => r.approved) // 承認済みのみ表示
-                .map((r) => (
+                .map((r) => {
+                  // owner_id に一致するユーザーを探す
+                  const owner = users.find(u => u.id === r.owner_id);
+                  
+                  return(
                   <tr key={r.id} className={styles.requeststore}>
                     <td>{r.name}</td>
-                    <td>{/* 申請者名 */}</td>
+                    <td>{owner ? owner.name : "不明"}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
                     <td>
                       {r.approved
@@ -166,7 +170,8 @@ export default function Adminhome() {
                         : 'ー'}
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           ) : (
@@ -189,11 +194,15 @@ export default function Adminhome() {
               </thead>
               <tbody>
                 {filteredShops
-                .filter(r => !r.approved) // 承認済みのみ表示
-                .map((r) => (
+                .filter(r => !r.approved) // 未承認のみ表示
+                .map((r) => {
+                  // owner_id に一致するユーザーを探す
+                  const owner = users.find(u => u.id === r.owner_id);
+
+                  return(
                   <tr key={r.id} className={styles.requeststore}>
                     <td>{r.name}</td>
-                    <td>{/* 申請者名 */}</td>
+                    <td>{owner ? owner.name : "不明"}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
                     <td>
                       {r.approved
@@ -215,7 +224,8 @@ export default function Adminhome() {
                         : 'ー'}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           ) : (
@@ -230,7 +240,7 @@ export default function Adminhome() {
                 filteredShops
                 .filter(r => r.isPublished) // 公開済みのみ表示
                 .map((r) => (
-                  <div className={styles.visibleshop}>
+                  <div key={r.id} className={styles.visibleshop}>
                     {/* 店舗の写真 */}
                     <img
                       src={r.image_url}

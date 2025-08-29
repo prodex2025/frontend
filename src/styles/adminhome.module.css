@@ -8,6 +8,7 @@
 
 /* 検索とカテゴリーボタンが入るコンテナ */
 .Barcontainer{
+  position: relative;
   display: flex;
   justify-content: center;      /* 横方向中央揃え */
   align-items: center;
@@ -58,11 +59,14 @@
 
 /* カテゴリー編集ボタン */
 .categoriesButton{
-  border: 1.5px solid #999;
+  background-color: #ffc000;
+  color: white;
+  border: 1.5px solid #d3d3d3;
   padding: 5px 20px;            /* 左右に内側余白 */
   border-radius: 42px;       /* 丸みをつける */
-  margin-left: 5%;
   cursor: pointer;
+  position: absolute;
+  right: 80px;
 }
 
 
