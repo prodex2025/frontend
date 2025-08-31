@@ -43,6 +43,7 @@ export interface Dishes {
   description?: string;    //メニューのメモ
   image_url: string;      //メニューの画像へのアクセスルート
   video_url?: string;      //メニューの3D動画へのアクセスルート
+  video_task_id?: string;
 }
 
 // カテゴリ―

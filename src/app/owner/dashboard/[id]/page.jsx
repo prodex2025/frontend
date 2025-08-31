@@ -3,7 +3,6 @@
 
 import styles from '@/styles/StoreDetailPage.module.css';
 
-
 import { useState } from 'react';     //タブ切り替え、状態保存用
 import { useParams, useSearchParams, useRouter  } from 'next/navigation';  //URLパラメータを取得するためのフック
 import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
@@ -17,6 +16,7 @@ import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコ
 import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
 import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
 import EditDetailTab from '@/components/Molecules/EditDetailTab';
+import EditMenuTab from '@/components/Molecules/EditMenuTab';
 
 export default function StoreDetailPage() {
 
@@ -145,7 +145,7 @@ export default function StoreDetailPage() {
       ):(
         <>
           {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
-          {activeTab === 'menu' && <EditStoreForm section="menu" />}
+          {activeTab === 'menu' && <EditMenuTab restaurant={restaurant} section="menu" />}
         </>
       )}
     </div>
