@@ -286,8 +286,23 @@ export default function Adminhome() {
                               : r.name
                             }
                           </p>
-                          <p className={styles.privatebutton} onClick={() => setPrivateModal(true)}>非公開にする</p>
-                          <a href="" className={styles.smalltext}>この店舗の詳細ページへ</a>
+                          <p 
+                            className={styles.privatebutton} 
+                            onClick={(e) =>{
+                              e.stopPropagation();
+                              setPrivateModal(true);
+                            }}>
+                            非公開にする
+                          </p>
+                          <p 
+                            className={styles.smalltext}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/store-detail?id=${r.id}`)
+                            }}
+                          >
+                            この店舗の詳細ページへ
+                          </p>
                         </div>
                       ) : (
                         // 閉じているときに見せたい内容
@@ -318,7 +333,10 @@ export default function Adminhome() {
                       
                       <span
                         className={`material-symbols-outlined ${styles.displaychange}`}
-                        onClick={() => setOpenId(openId === r.id ? null : r.id)}
+                        onClick={(e) =>{
+                          e.stopPropagation();
+                          setOpenId(openId === r.id ? null : r.id);
+                        }}
                       >
                       more_vert
                       </span>
@@ -367,8 +385,23 @@ export default function Adminhome() {
                               : r.name
                             }
                           </p>
-                          <p className={styles.publicbutton} onClick={() => setPublicModal(true)}>公開する</p>
-                          <a href="" className={styles.smalltext}>この店舗の詳細ページへ</a>
+                          <p 
+                            className={styles.publicbutton} 
+                            onClick={(e) =>{
+                              e.stopPropagation();
+                              setPublicModal(true);
+                            }}>
+                            公開する
+                          </p>
+                          <p 
+                            className={styles.smalltext}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/store-detail?id=${r.id}`)
+                            }}
+                          >
+                            この店舗の詳細ページへ
+                          </p>
                         </div>
                       ) : (
                         // 閉じているときに見せたい内容
@@ -399,7 +432,10 @@ export default function Adminhome() {
                       
                       <span
                         className={`material-symbols-outlined ${styles.displaychange}`}
-                        onClick={() => setOpenId(openId === r.id ? null : r.id)}
+                        onClick={(e) =>{
+                          e.stopPropagation();
+                          setOpenId(openId === r.id ? null : r.id);
+                        }}
                       >
                       more_vert
                       </span>
