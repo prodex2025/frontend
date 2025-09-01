@@ -5,7 +5,7 @@ import styles from "@/styles/EditMenuTab.module.css";
 import { allergy } from "@/data/mockData";
 
 // コンポーネント
-import ApprovalsInput from "@/components/atoms/approvalsInput";
+import ApprovalsInput from "@/components/atoms/ApprovalsInput";
 import ApprovalsTextarea from "@/components/atoms/ApprovalsTextarea";
 import ApprovalsImg from "@/components/atoms/ApprovalsImg";
 import ApprovalsVideo from "@/components/atoms/ApprovalsVideo";
@@ -49,7 +49,11 @@ export default function EditMenuRegistartionForm({ onSuccess, onCancel }) {
 
       // --- 入力バリデーション（最低限） ---
       const name = String(formData.get("name") || "").trim();
-      const priceNum = Number(formData.get("price"));
+      const rawPrice = String(formData.get("price") ?? "").trim();
+      const priceNum = Number(rawPrice);
+      if (!rawPrice || Number.isNaN(priceNum) || priceNum < 0) {
+        throw new Error("価格は0以上の数値で入力してください。");
+      }
       if (!name) throw new Error("料理名は必須です。");
       if (Number.isNaN(priceNum) || priceNum < 0) throw new Error("価格は0以上の数値で入力してください。");
 
@@ -126,8 +130,8 @@ export default function EditMenuRegistartionForm({ onSuccess, onCancel }) {
       <ApprovalsImg name="image_url" id="image_url" text="料理の写真" />
 
       {/* 動画アップロード */}
-      <ApprovalsVideo name="video_url" id="video_url" text="料理の動画" />
-      <small>料理を360°撮影した動画をアップロードしてください。</small>
+      <ApprovalsVideo name="video_url" id="video_url" text="料理の動画（.mp4のみ対応）" />
+      <small>料理を360°撮影した動画をアップロードしてください（.mp4のみ対応）。</small>
 
       {/* 料理名 */}
       <ApprovalsInput type="text" name="name" id="name" text="料理名" />

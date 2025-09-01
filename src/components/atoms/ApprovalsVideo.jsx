@@ -2,84 +2,60 @@
 
 import styles from '@/styles/ownerRegister.module.css';
 import Cancel from '@mui/icons-material/Cancel';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 
 export default function ApprovalsVideo({ name, id, text }) {
   const fileInputRef = useRef(null);
 
-  // 選択されたファイル名
   const [fileName, setFileName] = useState('');
-  // プレビュー動画URL（サーバー返却の mp4 URL またはフォールバックの dataURL）
   const [preview, setPreview] = useState(null);
+  const [error, setError] = useState('');
 
-  // ファイル選択ボックスをクリックさせる
   const handleClick = () => {
     fileInputRef.current?.click();
   };
 
-  // ファイルが選択された時の処理
-  const handleChange = async (e) => {
+  // MP4のみ許可するバリデーション
+  const isMp4 = (file) => {
+    if (!file) return false;
+    // 1) MIMEで判定
+    if (file.type === 'video/mp4') return true;
+    // 2) 拡張子でダブルチェック（環境によってMIMEが空のことがあるため）
+    const ext = file.name?.split('.').pop()?.toLowerCase();
+    if (ext === 'mp4') return true;
+    return false;
+  };
+
+  // ファイル選択 → そのままプレビュー（MP4のみ）
+  const handleChange = (e) => {
     const file = e.target.files?.[0];
+    setError('');
+    setPreview(null);
+
     if (!file) {
       resetVideo();
       return;
     }
 
-    setFileName(file.name);
-
-    try {
-      // ---- まずはサーバーへアップロード（.mov → .mp4 に変換）----
-      const fd = new FormData();
-      fd.append('video', file); // /api/upload/video は "video" フィールド名で受け取る実装
-
-      const res = await fetch('/api/upload/video', {
-        method: 'POST',
-        body: fd,
-      });
-      const json = await res.json();
-
-      if (!res.ok) {
-        // サーバー変換に失敗した場合はフォールバック（FileReader で dataURL プレビュー）
-        await fallbackPreview(file);
-        return;
-      }
-
-      // サーバー側で変換済みの mp4 URL をプレビューに使用（互換性◎）
-      setPreview(json.url); // 例: "/video/169..._xxx.mp4"
-    } catch (err) {
-      // 予期せぬエラー時もフォールバック
-      await fallbackPreview(file);
-    }
-  };
-
-  // フォールバック: FileReader で dataURL プレビュー（ブラウザが再生できない拡張子だとプレビュー不可のことあり）
-  const fallbackPreview = async (file) => {
-    if (!file || !file.type?.startsWith('video/')) {
-      setPreview(null);
+    if (!isMp4(file)) {
+      // 許可しない拡張子は即リセット＆エラー表示
+      resetVideo();
+      setError('MP4形式（.mp4）の動画のみアップロードできます。');
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result); // base64形式でプレビュー（※互換性は mp4 URLに劣る）
-    };
-    reader.readAsDataURL(file);
+
+    setFileName(file.name);
+    const url = URL.createObjectURL(file);
+    setPreview(url);
   };
 
-  // 動画のリセット
   const resetVideo = () => {
     setFileName('');
     setPreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''; // input をリセット
+      fileInputRef.current.value = '';
     }
   };
-
-  // アンマウント時に後処理（現状は特になし。ObjectURL を使っていないため revoke 不要）
-  useEffect(() => {
-    return () => {
-      // cleanup
-    };
-  }, []);
 
   return (
     <div className={styles.imgContent}>
@@ -91,7 +67,7 @@ export default function ApprovalsVideo({ name, id, text }) {
         type="file"
         name={name}
         id={id}
-        accept="video/*"
+        accept="video/mp4"               // ← MP4だけを選択ダイアログで表示
         ref={fileInputRef}
         className="hidden"
         onChange={handleChange}
@@ -99,19 +75,24 @@ export default function ApprovalsVideo({ name, id, text }) {
 
       <label htmlFor={id}>{text}</label>
 
+      {/* エラー表示 */}
+      {error && <small style={{ color: 'red', padding: '0 12px' }}>{error}</small>}
+
       {preview && (
         <div className={styles.previewContainer}>
-          <button type="button"
-          className={styles.cancelBtn}
-          onClick={(e) => {
-            e.preventDefault();  //デフォルトのbutton動作を止める
-            e.stopPropagation(); // 動画へのイベント伝播を止める
-            resetVideo();        // 動画リセット処理
-            }}>
-              <Cancel />
+          <button
+            type="button"
+            className={styles.cancelBtn}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              resetVideo();
+            }}
+          >
+            <Cancel />
           </button>
           <video
-            key={preview} 
+            key={preview}
             src={preview}
             className={`${styles.previewImage} ${styles.videoPreview}`}
             controls

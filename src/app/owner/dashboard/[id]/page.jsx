@@ -15,8 +15,8 @@ import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統�
 import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
 import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
 import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
-import EditDetailTab from '@/components/Molecules/EditDetailTab';
-import EditMenuTab from '@/components/Molecules/EditMenuTab';
+import EditDetailTab from '@/components/molecules/EditDetailTab';
+import EditMenuTab from '@/components/molecules/EditMenuTab';
 
 export default function StoreDetailPage() {
 
