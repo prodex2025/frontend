@@ -100,3 +100,75 @@ export async function POST(req: Request) {
     );
   }
 }
+
+/**
+ * DELETE /api/dishes
+ * 指定の料理を削除
+ */
+export async function DELETE(req: Request) {
+  try {
+    // 1) クエリパラメータから id を探す
+    const url = new URL(req.url);
+    const queryId = url.searchParams.get("id");
+
+    // 2) 見つからなければ JSON ボディから id を探す
+    let bodyId: unknown = undefined;
+    if (!queryId) {
+      try {
+        // 空ボディだと .json() は例外になる可能性があるので try/catch
+        const body = (await req.json()) as { id?: unknown } | undefined;
+        bodyId = body?.id;
+      } catch {
+        // ボディなしは無視（後続で未指定エラーに）
+      }
+    }
+
+    const idRaw = queryId ?? bodyId;
+    const dishId = Number(idRaw);
+
+    // バリデーション
+    if (!Number.isFinite(dishId) || dishId <= 0) {
+      return NextResponse.json(
+        { message: "❌ id が不正です。?id= または JSON ボディ { id } で指定してください。" },
+        { status: 400 }
+      );
+    }
+
+    // 料理の存在チェック
+    const idx = dishes.findIndex((d: Dishes) => d.id === dishId);
+    if (idx === -1) {
+      return NextResponse.json(
+        { message: `❌ 指定された料理（id=${dishId}）は存在しません。` },
+        { status: 404 }
+      );
+    }
+
+    // 対象料理を削除（配列をミューテート）
+    const [deletedDish] = dishes.splice(idx, 1);
+
+    // 紐づく dish_allergy を削除（同じくミューテートで再代入はしない）
+    const removedLinks: Dish_allergy[] = [];
+    for (let i = dish_allergy.length - 1; i >= 0; i--) {
+      if (dish_allergy[i].dish === dishId) {
+        // 取り出してから削除
+        removedLinks.push(dish_allergy[i]);
+        dish_allergy.splice(i, 1);
+      }
+    }
+
+    return NextResponse.json(
+      {
+        message: "✅ 削除に成功しました。",
+        deleted_dish: deletedDish,
+        deleted_allergy_links: removedLinks,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE /api/dishes error:", error);
+    return NextResponse.json(
+      { message: "❌ 予期せぬエラーが発生しました。" },
+      { status: 500 }
+    );
+  }
+}

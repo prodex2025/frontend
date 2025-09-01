@@ -4,14 +4,15 @@ import React, { useEffect, useState } from 'react';
 import styles from '@/styles/EditMenuTab.module.css';
 
 // コンポーネント
-import EditStoreModal from '@/components/Molecules/EditStoreModal';
-import EditMenuRegistartionForm from '@/components/Molecules/EditMenuRegistrationForm';
+import EditStoreModal from '@/components/molecules/EditStoreModal';
+import EditMenuRegistartionForm from '@/components/molecules/EditMenuRegistrationForm';
 
 export default function EditMenuTab({ restaurant }) {
   if (!restaurant) return null;
 
   // dishesの状態管理
   const [restaurantDishes, setRestaurantDishes] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
 
   // モーダル管理
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,10 +44,37 @@ export default function EditMenuTab({ restaurant }) {
     setIsModalOpen(true);
   };
 
-  // 登録完了後に再取得
-  const handleRegisterComplete = async () => {
-    await fetchDishes();
-    setIsModalOpen(false);
+  // 削除アイコン（/api/dishes?id=:id を DELETE）
+  const handleDelete = async (dish) => {
+    if (deletingId !== null) return; // 連打防止
+    if (!confirm(`「${dish.name}」を削除しますか？`)) return;
+
+    setDeletingId(dish.id);
+
+    // 楽観的更新：先にUIから消す（失敗時はロールバック）
+    const prev = restaurantDishes;
+    setRestaurantDishes((list) => list.filter((d) => d.id !== dish.id));
+
+    try {
+      const res = await fetch(`/api/dishes?id=${dish.id}`, { method: 'DELETE' });
+
+      if (!res.ok) {
+        // ロールバック
+        setRestaurantDishes(prev);
+        const data = await res.json().catch(() => ({}));
+        alert(data.message ?? '削除に失敗しました。');
+        return;
+      }
+
+      // モック運用なら再取得は省略可。常に正確にしたいなら↓を有効化
+      // await fetchDishes();
+    } catch (e) {
+      setRestaurantDishes(prev); // ロールバック
+      alert('通信エラーが発生しました。');
+      console.error(e);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -74,7 +102,7 @@ export default function EditMenuTab({ restaurant }) {
               <div className={styles.menuCardHeader}>
                 <span
                   className={`${styles.icon} material-symbols-outlined`}
-                  onClick={() => console.log('削除:', dish.id)}
+                  onClick={() => handleDelete(dish)}
                 >
                   delete
                 </span>
