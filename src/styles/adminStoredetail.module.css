@@ -1,0 +1,49 @@
+.tableContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+}
+
+/* 店舗情報テーブル */
+.informationTable{
+    border-collapse: collapse;
+    width: 80%;
+    font-size: 20px;
+}
+
+.informationTable td{
+    border: 1.5px solid #b5b5b5;
+    padding: 8px 12px;
+}
+
+.informationTable .label{
+    background-color: #e6e6e6;
+    font-weight: bold;
+    width: 35%;
+}
+
+.content img{
+    max-height: 200px;
+}
+
+
+/* 営業時間テーブル */
+.businesstimeTable{
+    border-collapse: collapse;
+    width: 80%;
+    font-size: 18px;
+}
+
+.businesstimeTable th{
+    border: 1.5px solid #b5b5b5;
+    padding: 6px 12px;
+    background-color: #e6e6e6;
+}
+
+.businesstimeTable td{
+    border: 1.5px solid #b5b5b5;
+    padding: 10px 12px;
+    text-align: center;
+}

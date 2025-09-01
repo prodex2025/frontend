@@ -3,6 +3,10 @@
 
 // useStateを使うために読み込み
 import { useState,useEffect } from 'react';
+
+// UseRouter使うために読み込み(ページ遷移に使うフック)
+import { useRouter } from 'next/navigation';
+
 // このページ専用のCSSファイルの読み込み
 import styles from '@/styles/adminhome.module.css';
 
@@ -15,6 +19,9 @@ import { style } from '@mui/system';
 
 
 export default function Adminhome() {
+  // ルーターのインスタンスを取得
+  const router = useRouter();
+
   //店舗検索用
   const [searchText, setSearchText] = useState('');
   // 検索結果絞り込まれたデータを保存
@@ -146,7 +153,12 @@ export default function Adminhome() {
                   const owner = users.find(u => u.id === r.owner_id);
                   
                   return(
-                  <tr key={r.id} className={styles.requeststore}>
+                  <tr
+                    key={r.id}
+                    className={styles.requeststore}
+                    // 行クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
+                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
+                  >
                     <td>{r.name}</td>
                     <td>{owner ? owner.name : "不明"}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
@@ -200,7 +212,12 @@ export default function Adminhome() {
                   const owner = users.find(u => u.id === r.owner_id);
 
                   return(
-                  <tr key={r.id} className={styles.requeststore}>
+                  <tr 
+                    key={r.id} 
+                    className={styles.requeststore}
+                    // 行クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
+                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
+                  >
                     <td>{r.name}</td>
                     <td>{owner ? owner.name : "不明"}</td>
                     <td>{r.isPublished ? '公開済み' : '非公開'}</td>
@@ -240,7 +257,12 @@ export default function Adminhome() {
                 filteredShops
                 .filter(r => r.isPublished) // 公開済みのみ表示
                 .map((r) => (
-                  <div key={r.id} className={styles.visibleshop}>
+                  <div 
+                    key={r.id} 
+                    className={styles.visibleshop}
+                    // 店舗クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
+                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
+                  >
                     {/* 店舗の写真 */}
                     <img
                       src={r.image_url}
@@ -316,7 +338,12 @@ export default function Adminhome() {
                 filteredShops
                 .filter(r => !r.isPublished) // 公開済みのみ表示
                 .map((r) => (
-                  <div key={r.id} className={styles.visibleshop}>
+                  <div 
+                    key={r.id} 
+                    className={styles.visibleshop}
+                    // 店舗クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
+                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
+                  >
                     {/* 店舗の写真 */}
                     <img
                       src={r.image_url}
