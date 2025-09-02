@@ -1,6 +1,7 @@
 'use client';
 
 import styles from '@/styles/ownerRegister.module.css';
+import { useState } from 'react';
 
 // コンポーネントのインポート
 import ApprovalsButton from '@/components/atoms/ApprovalsButton';
@@ -9,7 +10,17 @@ import ApprovalsTextarea from '@/components/atoms/ApprovalsTextarea';
 import ApprovalsImg from '@/components/atoms/ApprovalsImg';
 import BusinessHoursTable from '@/components/Molecules/BusinessHoursTable';
 
-export default function LoginPage() {
+export default function RestaurantRegister() {
+
+  const days = ['月', '火', '水', '木', '金', '土', '日', '祝日'];
+
+  const [hours, setHours] = useState(
+    days.map(() => ({
+      closed: false,
+      lunch: { start: '', end: '', available: false },
+      dinner: { start: '', end: '', available: false },
+    }))
+  );
 
   function rigister() {
     console.log("登録ボタンが押されました。");
@@ -37,7 +48,7 @@ export default function LoginPage() {
             サービスのご利用にあたり、食品衛生法に基づく有効な「飲食店営業許可証（写し）」のご提出をお願いしております。<br />
             アップロードする際は、許可番号や有効期限、営業者名がはっきりと確認できるよう撮影した画像をご準備ください。
           </small>
-          <BusinessHoursTable />
+          <BusinessHoursTable hours={hours} setHours={setHours}/>
         </div>
       </form>
       <ApprovalsButton type="submit" onClick={rigister} text="登録" />

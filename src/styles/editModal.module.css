@@ -1,0 +1,104 @@
+.closeBtn{
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 1000; /* 必要に応じて他UIの上に */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.modalContent{
+  padding: 20px;
+  position: relative;
+}
+
+.h2{
+  display: inline-block; 
+  font-weight: bold;
+  border-bottom: 2px solid #ffd700;
+  width: auto;
+  font-size: 24px;
+  padding: 0px 8px;
+}
+
+.h3{
+  font-size: 18px;
+}
+
+.p{
+  color: rgb(41, 41, 41);
+  font-size: 14px;
+}
+
+.footerContent{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.content{
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.leftContent{
+  display: flex;
+  flex-direction: column;
+  flex-basis: 50%;
+  gap: 5px;
+  justify-content: center;
+}
+
+.rightContent{
+  display: flex;
+  flex-direction: column;
+  flex-basis: 50%;
+  gap: 5px;
+}
+
+.submitBtn{
+  display: inline-block; 
+  background-color: rgb(126, 126, 126);
+  color: white;
+  border-radius: 14px;
+  padding: 2px 36px;
+}
+
+.categoryList {
+  display: flex;
+  flex-wrap: wrap;       /* 複数行に折り返す */
+  gap: 8px;              /* ボタン間の間隔 */
+}
+
+.category {
+  flex: 0 0 calc(25% - 8px); /* 4つで1行に収める（gapを考慮） */
+  background-color: #dbdbdb;
+  border: none;
+  cursor: pointer;
+  text-align: center; 
+  white-space: nowrap;       /* 改行禁止 */
+  font-size: clamp(4px, 2vw, 14px); /* 最小4px、最大14px、中間は画面幅で変動 */
+  border-radius: 12px;
+  padding: 1px 2px;
+}
+
+.selected {
+  background-color: #ffd700;
+  color: #fff;
+}
+
+.hoursContent{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-basis: 100%;
+}
