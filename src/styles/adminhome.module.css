@@ -131,8 +131,8 @@
 }
 
 /* カテゴリータグクリックしたとき */
-.selected {
-  background: #ffd700;
+.active {
+  background: #ffc000;
   color: #fff;
 }
 
@@ -199,6 +199,7 @@
   grid-template-columns: repeat(4, 1fr); /* 4列にする */
   gap: 25px;
   margin: 10px 40px;
+  position: relative;
 }
 
 .visibleshop{
@@ -217,6 +218,13 @@
   box-shadow:
     5px 5px 10px #A6B4C8,     /* 内側の影（左上） */
     -5px -5px 15px #ffffff;  /* 内側の影（右下） */
+}
+
+.nothing {
+  white-space: nowrap;           /* 改行禁止 */
+  grid-column: 1 / -1; /* グリッドの全列にまたがる */
+  text-align: center;   /* 文字を中央寄せ */
+  margin: 20px 0;       /* 上下の余白 */
 }
 
 .storephoto{

@@ -10,9 +10,6 @@ import { useRouter } from 'next/navigation';
 // このページ専用のCSSファイルの読み込み
 import styles from '@/styles/adminhome.module.css';
 
-//コンポーネントのインポート
-import CategoryTag from '@/components/atoms/CategoryTag.jsx';       // カテゴリー用の再利用コンポーネント
-
 // 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
 import { restaurants, categories, reataurants_categories ,users} from '@/data/mockData';
 import { style } from '@mui/system';
@@ -22,19 +19,17 @@ export default function Adminhome() {
   // ルーターのインスタンスを取得
   const router = useRouter();
 
-  //店舗検索用
+  // 現在選択されているカテゴリ名の集合
+  const [selectedCategories,setSelectedCategories] = useState(new Set());
+  // 検索バーに入力されたテキスト
   const [searchText, setSearchText] = useState('');
-  // 検索結果絞り込まれたデータを保存
-  const [filteredShops, setFilteredShops] = useState(restaurants);
+  const [shops,setShops] = useState([]);
 
   // カテゴリー編集モーダル表示ステータス
   const [isModalopen,setModalOpen] = useState(false);
 
   // カテゴリー追加用
   const[categoriesText,setCategoriesText] = useState('');
-
-  // 現在選択されているカテゴリー名の集合（Setで重複なく管理）
-  const [selected, setSelected] = useState(new Set());
 
   // setSelectedKindは、状態 （selectedKind） を変更する関数
   const [selectedKind, setSelectedKind] = useState('承認済み');
@@ -48,17 +43,50 @@ export default function Adminhome() {
   // 公開確認モーダル
   const [publicModal, setPublicModal] = useState(false);
 
+  // ＝＝＝＝＝＝＝＝＝＝関数＝＝＝＝＝＝＝＝＝＝＝
+  // 初回マウントでそれぞれの店舗情報に対応するカテゴリ項目を配列で追加
+  useEffect(() => {
+    const formattedShops = restaurants.map((r) => {
+      const relatedCategories = reataurants_categories
+        .filter(rc => rc.restaurant_id === r.id)
+        .map(rc => categories.find(c => c.id === rc.category_id)?.name || '');
+      return {
+        ...r,
+        categories: relatedCategories,
+      };
+    });
+    setShops(formattedShops);
+  }, []);
+
+  // カテゴリ選択・解除
+  const toggleCategory = (name) =>{
+    const updated = new Set(selectedCategories);
+    if(updated.has(name)){
+      updated.delete(name); //選択時は解除
+    }
+    else{
+      updated.add(name); //選択
+    }
+    setSelectedCategories(updated);
+  };
+
+  // 検索テキスト、カテゴリ条件でフィルタ
+  const filteredShops = shops.filter(shop => {
+    // undefinedなら空配列にする
+    const shopCategories = shop.categories || [];
+    // カテゴリでフィルタ
+    const matchesCategory =
+      selectedCategories.size === 0 || shop.categories.some(cat => selectedCategories.has(cat));
+    
+    // 検索バーのテキストで店舗名をフィルタ
+    const matchesSearch = shop.name.toLowerCase().includes(searchText.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  })
+
+
   // storedetailの表示を切り替えている店舗を探す
   const openShop = filteredShops.find(r => r.id === openId);
-
-  // ＝＝＝＝＝＝＝＝＝＝関数＝＝＝＝＝＝＝＝＝＝＝
-  // 検索バーの処理
-  useEffect(() => {
-    const filtered = restaurants.filter(r =>
-      r.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setFilteredShops(filtered);
-  },[searchText]);
 
 
   return (
@@ -96,13 +124,13 @@ export default function Adminhome() {
             <div className={styles.filterButtons}>
               {/* 全カテゴリをタグとして表示 */}
               {categories.map((category) => (
-                <CategoryTag
+                <button
                   key={category.id}    // React のキー
-                  label={category.name}    // 表示名
-                  //selected={selected.has(category.name)}    // 選択状態を判定
-                  //onClick={() => toggleCategory(category.name)}    // クリック時の処理
-                  className={styles.filterButton}                  // スタイル指定
-                />
+                  onClick={() => toggleCategory(category.name)}
+                  className={`${styles.filterButton} ${selectedCategories.has(category.name) ? styles.active : ''}`}                  // スタイル指定
+                >
+                  {category.name}
+                </button>
               ))}
             </div>
           </div>
@@ -134,9 +162,11 @@ export default function Adminhome() {
         {/* 表を表示するエリア */}
         <div className={styles.tablearea}>
           {/* 承認済み店舗一覧 */}
-          {selectedKind === "承認済み" && (
-            filteredShops.length > 0 ? (
-            <table className={styles.storeRequestList}>
+          {selectedKind === "承認済み" && (() => {
+            const approvedShops = filteredShops.filter(r => r.approved);
+
+            return approvedShops.length > 0 ?(
+              <table className={styles.storeRequestList}>
               <thead>
                 <tr>
                   <th>店舗名</th>
@@ -146,9 +176,8 @@ export default function Adminhome() {
                 </tr>
               </thead>
               <tbody>
-                {filteredShops
-                .filter(r => r.approved) // 承認済みのみ表示
-                .map((r) => {
+                {approvedShops
+                  .map((r) => {
                   // owner_id に一致するユーザーを探す
                   const owner = users.find(u => u.id === r.owner_id);
                   
@@ -186,16 +215,18 @@ export default function Adminhome() {
               })}
               </tbody>
             </table>
-          ) : (
+            ):(
             <p className={styles.nothing}>該当する店舗はありません</p>
-            )
-          )}
-          
+            );
+          })()}
+
 
           {/* 未承認一覧を表示 */}
-          {selectedKind === "未承認" && (
-            filteredShops.length > 0 ? (
-            <table className={styles.storeRequestList}>
+          {selectedKind === "未承認" && (() => {
+            const unapprovedShops = filteredShops.filter(r => !r.approved);
+
+            return unapprovedShops.length > 0 ?(
+              <table className={styles.storeRequestList}>
               <thead>
                 <tr>
                   <th>店舗名</th>
@@ -205,15 +236,14 @@ export default function Adminhome() {
                 </tr>
               </thead>
               <tbody>
-                {filteredShops
-                .filter(r => !r.approved) // 未承認のみ表示
-                .map((r) => {
+                {unapprovedShops
+                  .map((r) => {
                   // owner_id に一致するユーザーを探す
                   const owner = users.find(u => u.id === r.owner_id);
-
+                  
                   return(
-                  <tr 
-                    key={r.id} 
+                  <tr
+                    key={r.id}
                     className={styles.requeststore}
                     // 行クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
                     onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
@@ -241,22 +271,23 @@ export default function Adminhome() {
                         : 'ー'}
                     </td>
                   </tr>
-                  );
-                })}
+                );
+              })}
               </tbody>
             </table>
-          ) : (
+            ):(
             <p className={styles.nothing}>該当する店舗はありません</p>
-            )
-          )}
+            );
+          })()}
+
 
           {/* 公開済み一覧を表示 */}
-          {selectedKind === "公開済み" &&(
-            <div className={styles.visibleshops}>
-            {filteredShops.length > 0 ? (
-                filteredShops
-                .filter(r => r.isPublished) // 公開済みのみ表示
-                .map((r) => (
+          {selectedKind === "公開済み" &&(() => {
+            const publishedShops = filteredShops.filter(r => r.isPublished);
+
+            return publishedShops.length > 0 ? (
+              <div className={styles.visibleshops}>
+                {publishedShops.map((r) => (
                   <div 
                     key={r.id} 
                     className={styles.visibleshop}
@@ -342,20 +373,21 @@ export default function Adminhome() {
                       </span>
                     </div>
                   </div>
-                ))
-          ) : (
-            <p className={styles.nothing}>該当する店舗はありません</p>
-            )}
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className={styles.nothing}>該当する店舗はありません</p>
+            );
+          })()}
+          
 
           {/* 非公開一覧を表示 */}
-          {selectedKind === "非公開" &&(
-            <div className={styles.visibleshops}>
-            {filteredShops.length > 0 ? (
-                filteredShops
-                .filter(r => !r.isPublished) // 公開済みのみ表示
-                .map((r) => (
+          {selectedKind === "非公開" &&(() => {
+            const unpublishedShops = filteredShops.filter(r => !r.isPublished);
+
+            return unpublishedShops.length > 0 ? (
+              <div className={styles.visibleshops}>
+                {unpublishedShops.map((r) => (
                   <div 
                     key={r.id} 
                     className={styles.visibleshop}
@@ -386,12 +418,12 @@ export default function Adminhome() {
                             }
                           </p>
                           <p 
-                            className={styles.publicbutton} 
+                            className={styles.privatebutton} 
                             onClick={(e) =>{
                               e.stopPropagation();
-                              setPublicModal(true);
+                              setPrivateModal(true);
                             }}>
-                            公開する
+                            非公開にする
                           </p>
                           <p 
                             className={styles.smalltext}
@@ -441,12 +473,12 @@ export default function Adminhome() {
                       </span>
                     </div>
                   </div>
-                ))
-          ) : (
-            <p className={styles.nothing}>該当する店舗はありません</p>
-            )}
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className={styles.nothing}>該当する店舗はありません</p>
+            );
+          })()}
         </div>
 
         {/* カテゴリー編集モーダル */}
