@@ -1,5 +1,5 @@
 // 型のimport
-import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar, Dish_allergy, Allergy, RestaurantAccessLog, MenuAccessLog, PopularMenu, StoreStatistics } from "./types";
+import { Restaurants, User, UserRole, Dishes, Categories, Reataurants_Categories, Restaurants_business_hours, Restaurants_business_calendar, Dish_allergy, Allergy, RestaurantAccessLog, MenuAccessLog, PopularMenu, StoreStatistics, ApiSerialize } from "./types";
 
 // ユーザーの仮データ
 export const users: User[] = [
@@ -317,7 +317,7 @@ export const dishes:Dishes[] = [
     price:500,
     description:'ハンバーグ',
     image_url:'@/image/humburger.png',
-    video_url:'@/video/menu.mp4',
+    video_url:'@/model/f5e9101a49ea4a3493d1bb4a09ac03ee/',
   },
   {
     id:2,
@@ -1083,4 +1083,13 @@ export const storeStatistics: StoreStatistics[] = [
   { restaurant_id: 1, total_restaurant_access: 127, total_menu_access: 59, total_dishes: 6 },
   { restaurant_id: 2, total_restaurant_access: 45, total_menu_access: 5, total_dishes: 3 },
   { restaurant_id: 3, total_restaurant_access: 15, total_menu_access: 4, total_dishes: 3 },
+];
+
+// 3DスキャンAPIに接続するタスクIDを管理
+export const apiserialize: ApiSerialize[] = [
+  {
+    id:1,
+    dish_id:1,
+    serialize:'f5e9101a49ea4a3493d1bb4a09ac03ee'
+  }
 ];
