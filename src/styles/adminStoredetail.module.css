@@ -1,0 +1,122 @@
+.fixedHeader{
+    position: relative;
+}
+
+.statusChange{
+    top: 50px;
+    right: 150px;
+    padding: 8px 30px;
+    font-size: 20px;
+    border: 1.5px solid #b5b5b5;
+    border-radius: 50px;
+    cursor: pointer;
+    position: absolute;
+}
+
+.statusChange:hover{
+    color: red;
+    border-color: red;
+}
+
+.tableContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+}
+
+/* 店舗情報テーブル */
+.informationTable{
+    border-collapse: collapse;
+    width: 80%;
+    font-size: 20px;
+}
+
+.informationTable td{
+    border: 1.5px solid #b5b5b5;
+    padding: 8px 12px;
+}
+
+.informationTable .label{
+    background-color: #e6e6e6;
+    font-weight: bold;
+    width: 35%;
+}
+
+.content img{
+    max-height: 200px;
+}
+
+
+/* 営業時間テーブル */
+.businesstimeTable{
+    border-collapse: collapse;
+    width: 80%;
+    font-size: 18px;
+}
+
+.businesstimeTable th{
+    border: 1.5px solid #b5b5b5;
+    padding: 6px 12px;
+    background-color: #e6e6e6;
+}
+
+.businesstimeTable td{
+    border: 1.5px solid #b5b5b5;
+    padding: 10px 12px;
+    text-align: center;
+}
+/* 公開確認モーダル本体 */
+.publicModal , .privateModal ,.approveModal{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  height: 30%;
+  min-width: 30%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.BackpublicModal{
+  position: fixed;        /* 画面全体に固定 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒背景 */
+  display: flex;          /* 中央寄せのためにflex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;           /* 最前面 */
+}
+
+.choicestore{
+  font-size: 20px;
+}
+
+.controlbutton{
+  display: flex;
+  gap: 20px;
+}
+
+.public{
+  width: 130px;
+  height: 40px;
+  font-size: 17px;
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  border: 1.5px solid #999;
+  border-radius:8px;
+}
+
+.OK{
+  background-color: #ffc000;
+  color: white;
+}
