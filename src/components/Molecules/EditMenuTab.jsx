@@ -21,7 +21,8 @@ export default function EditMenuTab({ restaurant }) {
 
   // 初回読み込み & 更新時にメニュー取得
   const fetchDishes = async () => {
-    const res = await fetch("/api/dishes");
+    const res = await fetch(`/api/dishes?restaurantId=${restaurant.id}`,{cache: 'no-store'});
+    // 返り値は配列で受けとる
     const data = await res.json();
     setRestaurantDishes(data.filter(d => d.restaurant_id === restaurant.id));
   };
@@ -113,7 +114,6 @@ export default function EditMenuTab({ restaurant }) {
                   edit
                 </span>
               </div>
-
               <img
                 src={dish.image_url.replace('@', '')}
                 alt={dish.name}

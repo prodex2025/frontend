@@ -5,7 +5,7 @@ import { restaurants_business_calendar } from '@/data/mockData';
 
 import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
 import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
-import EditBusinessHoursForm from "@/components/Molecules/EditBusinessHoursForm";
+import EditBusinessHoursForm from "@/components/molecules/EditBusinessHoursForm";
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土', '祝日'];
 

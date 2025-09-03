@@ -1,12 +1,25 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import styles from '@/styles/StoreMenuTab.module.css';
-import { dishes } from '@/data/mockData'; // モックデータから料理を取得
+import Link from 'next/link';
 
 export default function StoreMenuTab({ restaurant }) {
   if (!restaurant) return null;
 
-  // 対象店舗のメニューのみ抽出
-  const restaurantDishes = dishes.filter((dish) => dish.restaurant_id === restaurant.id);
+  // dishesの状態管理
+    const [restaurantDishes, setRestaurantDishes] = useState([]);
+
+  // 初回読み込み & 更新時にメニュー取得
+  const fetchDishes = async () => {
+    const res = await fetch(`/api/dishes?restaurantId=${restaurant.id}`,{cache: 'no-store'});
+    const data = await res.json();
+    setRestaurantDishes(data.filter(d => d.restaurant_id === restaurant.id));
+  };
+
+  useEffect(() => {
+    fetchDishes();
+  }, [restaurant.id]);
 
   return (
     <div className={styles.menuContainer}>
@@ -16,11 +29,13 @@ export default function StoreMenuTab({ restaurant }) {
         <div className={styles.menuGrid}>
           {restaurantDishes.map((dish) => (
             <div key={dish.id} className={styles.menuCard}>
-              <img src={dish.image_url.replace('@', '')} alt={dish.name} className={styles.menuImage} />
-              <div className={styles.menuInfo}>
-                <div className={styles.dishName}>{dish.name}</div>
-                <div className={styles.price}>￥{dish.price.toLocaleString()}<span className={styles.tax}>（税込み）</span></div>
-              </div>
+              <Link href={`/owner/dashboard/${dish.restaurant_id}/menu/${dish.id}`}>
+                <img src={dish.image_url.replace('@', '')} alt={dish.name} className={styles.menuImage} />
+                <div className={styles.menuInfo}>
+                  <div className={styles.dishName}>{dish.name}</div>
+                  <div className={styles.price}>￥{dish.price.toLocaleString()}<span className={styles.tax}>（税込み）</span></div>
+                </div>
+              </Link>
             </div>
           ))}
         </div>
