@@ -1,4 +1,4 @@
-//店舗詳細画面
+//管理者用の店舗詳細画面
 'use client';
 
 import styles from '@/styles/StoreDetailPage.module.css';
@@ -43,6 +43,16 @@ export default function StoreDetail() {
     const goBack = () => {
         router.push(`/store/list?page=${currentPage}`);  // ページ番号つきで戻る
     };
+
+    // 承認確認モーダル
+    const [approveModal,setApproveModal] = useState(false);
+
+    // 非公開確認モーダル
+    const [privateModal, setPrivateModal] = useState(false);
+
+    // 公開確認モーダル
+    const [publicModal, setPublicModal] = useState(false);
+
 
     //タブ切り替え用
     const [activeTab, setActiveTab] = useState('detail');
@@ -94,26 +104,50 @@ export default function StoreDetail() {
     <div className={styles.backButton} onClick={() => window.history.back()}>
         <span className={`material-symbols-outlined ${styles.backIcon}`}>arrow_back</span>
     </div>
-    <div className={styles.fixedHeader}>
+
+    <div className={`${styles.fixedHeader} ${adminStyles.nanntara}`}>
         <h1 className={styles.title}>{restaurant.name}</h1>
 
         <p className={styles.address}>
-        <a
-            href={`https://www.google.com/maps/search/?q=${restaurant.address}`}
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            {restaurant.address}
-        </a>
-    </p>
+            <a
+                href={`https://www.google.com/maps/search/?q=${restaurant.address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {restaurant.address}
+            </a>
+        </p>
 
-    <div className={styles.categoryContainer}>
-        {relatedCategories.map((category, index) => (
-            <CategoryTag key={index} label={category} selected={true} />
-        ))}
-    </div>
+        <div className={styles.categoryContainer}>
+            {relatedCategories.map((category, index) => (
+                <CategoryTag key={index} label={category} selected={true} />
+            ))}
+        </div>
 
-      <div className={styles.divider} /> {/* 区切り線 */}
+        {/* 公開・非公開・承認のボタン */}
+        <div>
+            <button 
+                className={adminStyles.statusChange}
+                onClick={() => {
+                    if(!restaurant.isPublished){
+                        setApproveModal(true) // 承認する
+                    }else if(restaurant.approved && restaurant.approved){
+                        setPrivateModal(true); // 非公開にする
+                    }else{
+                        setPublicModal(true); // 公開にする
+                    }
+                }}
+            >
+                {!restaurant.isPublished
+                    ? "承認する"
+                    : restaurant.approved && restaurant.approved
+                        ? "非公開にする"
+                        : "公開する"
+                }
+            </button>
+        </div>
+
+        <div className={styles.divider} /> {/* 区切り線 */}
     </div>
 
     {/* タブの切り替えUI */}
@@ -248,6 +282,44 @@ export default function StoreDetail() {
         )}
     </div>
 
+        {/* 承認確認モーダル */}
+        {approveModal === true &&(
+          <div className={adminStyles.BackpublicModal}  onClick={() => setApproveModal(false)}>
+            <div className={adminStyles.publicModal}>
+              <p className={adminStyles.choicestore}>{restaurant.name} を<strong>承認</strong>しますか</p>
+              <div className={adminStyles.controlbutton}>
+                <p className={`${adminStyles.public} ${adminStyles.OK}`}>OK</p>
+                <p className={adminStyles.public} onClick={() => setApproveModal(false)}>キャンセル</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 公開確認モーダル */}
+        {publicModal === true &&(
+          <div className={adminStyles.BackpublicModal}  onClick={() => setPublicModal(false)}>
+            <div className={adminStyles.publicModal}>
+              <p className={adminStyles.choicestore}>{restaurant.name} を<strong>公開</strong>しますか</p>
+              <div className={adminStyles.controlbutton}>
+                <p className={`${adminStyles.public} ${adminStyles.OK}`}>OK</p>
+                <p className={adminStyles.public} onClick={() => setPublicModal(false)}>キャンセル</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 非公開確認モーダル */}
+        {privateModal === true &&(
+          <div className={adminStyles.BackpublicModal}  onClick={() => setPrivateModal(false)}>
+            <div className={adminStyles.publicModal}>
+              <p className={adminStyles.choicestore}>{restaurant.name} を<strong>非公開</strong>にしますか</p>
+              <div className={adminStyles.controlbutton}>
+                <p className={`${adminStyles.public} ${adminStyles.OK}`}>OK</p>
+                <p className={adminStyles.public} onClick={() => setPrivateModal(false)}>キャンセル</p>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
     
     );
