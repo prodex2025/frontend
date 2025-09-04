@@ -50,7 +50,6 @@ export interface Categories{
   id:number;      //主キー
   name:string;    //カテゴリ―の名前
 }
-
 // 登録されているカテゴリ―
 export interface Reataurants_Categories{
   id: number;             // 主キー
@@ -95,7 +94,7 @@ export interface Dish_allergy
 export interface Allergy
 {
   id:number;    // 主キー
-  name:string;  // アレルギーの名前
+  name:string;  // アレルギーの名前 
 }
 
 // 店舗アクセス履歴（日別カウント）
@@ -126,4 +125,11 @@ export interface StoreStatistics {
   total_restaurant_access: number;
   total_menu_access: number;
   total_dishes: number;
+}
+
+// 3DスキャンAPIに接続するためのタスクIDを管理
+export interface ApiSerialize{
+  id: number;         // 主キー
+  dish_id: number;    // メニューのID
+  serialize: string;  // タスクID
 }

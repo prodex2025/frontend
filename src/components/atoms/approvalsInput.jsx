@@ -3,7 +3,7 @@
 import styles from '@/styles/approvals.module.css';
 
 // 名前・ID・URL等は引数で渡す
-export default function ApprovalsInput({type,name,id,text,value,onChange}){
+export default function ApprovalsInput({type,name,id,text,value,onChange,min}){
 
   if(value==null || value==""){
     value="";
@@ -11,7 +11,7 @@ export default function ApprovalsInput({type,name,id,text,value,onChange}){
 
   return(
     <div className={styles.inputContent}>
-      <input className={styles.content} type={type} name={name} id={id} placeholder='' defaultValue={value} onChange={onChange} required/>
+      <input className={styles.content} type={type} name={name} id={id} placeholder='' defaultValue={value} onChange={onChange} min={min}required/>
       <label htmlFor={id}>{text}</label>
     </div>
   );
