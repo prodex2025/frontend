@@ -317,7 +317,7 @@ export const dishes:Dishes[] = [
     price:500,
     description:'ハンバーグ',
     image_url:'@/image/humburger.png',
-    video_url:'@/model/f5e9101a49ea4a3493d1bb4a09ac03ee/',
+    video_url:'f5e9101a49ea4a3493d1bb4a09ac03ee',
   },
   {
     id:2,
@@ -385,7 +385,7 @@ export const dishes:Dishes[] = [
   {
     id:9,
     restaurant_id:3,
-    name:'ステーキ',
+    name:'アイス',
     price:480,
     description:'ステーキ',
     image_url:'@/image/menu.jpg',

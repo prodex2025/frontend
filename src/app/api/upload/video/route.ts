@@ -1,101 +1,142 @@
+// app/api/upload/video/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import fs from "fs/promises";
-import { existsSync, mkdirSync, createWriteStream } from "fs";
+import { promises as fs } from "fs";
+import { existsSync, mkdirSync } from "fs";
+import { randomUUID } from "crypto";
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegPath from "ffmpeg-static";
 
-export const runtime = "nodejs";        // ← App Router: Node ランタイムを明示
-export const dynamic = "force-dynamic"; // ← 動的ルート
+// App Router は Node ランタイムで動かす（ffmpeg を使うため）
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-// ffmpeg バイナリのパス設定（fluent-ffmpeg に教える）
+// ffmpeg バイナリのパスを fluent-ffmpeg に教える
 if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
 }
 
+// 受け付ける最大サイズ（例：300MB）
+const MAX_BYTES = 300 * 1024 * 1024;
+
+// 許可する拡張子/ MIME
+const VIDEO_MIMES = new Set([
+  "video/mp4",
+  "video/quicktime", // .mov
+  "video/x-matroska",
+  "video/webm",
+]);
+const MOV_EXTS = new Set([".mov", ".qt"]);
+
 /**
+ * POST /api/upload/video
  * 受け取った動画を /public/video に保存
- * - mov の場合は mp4(H.264/AAC) に変換
- * - mp4 の場合はそのまま保存
- * 返り値: { url, converted, mime, filename }
+ * - .mov（または QuickTime）なら mp4(H.264/AAC) に変換
+ * - mp4 などならそのまま保存
+ * レスポンス: { url, converted, mime, filename }
  */
 export async function POST(req: NextRequest) {
+  let tmpInPath = "";
   try {
     const form = await req.formData();
     const file = form.get("video") as File | null;
+
     if (!file) {
-      return NextResponse.json({ error: 'No file. Expect field "video".' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No file. Expect field "video".' },
+        { status: 400 }
+      );
     }
 
-    // 保存先の用意
-    const publicDir = path.join(process.cwd(), "public");
-    const videoOutDir = path.join(publicDir, "video");
-    if (!existsSync(videoOutDir)) mkdirSync(videoOutDir, { recursive: true });
+    // 簡易サイズチェック（File.size はブラウザが送ってくる値）
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json(
+        { error: "File too large." },
+        { status: 413 }
+      );
+    }
 
-    // 受け取ったファイルを一旦 /tmp に保存
-    const arrayBuf = await file.arrayBuffer();
-    const buf = Buffer.from(arrayBuf);
+    // 基本情報
+    const origName = (file.name || "upload").replace(/\s+/g, "_");
+    const mime = file.type || "application/octet-stream";
+    const ext = (path.extname(origName) || "").toLowerCase();
+
+    // video 以外を弾く（拡張子だけに依存しない）
+    if (!VIDEO_MIMES.has(mime) && !ext) {
+      return NextResponse.json(
+        { error: "Unsupported file type." },
+        { status: 415 }
+      );
+    }
+
+    // 保存先準備
+    const publicDir = path.join(process.cwd(), "public");
+    const outDir = path.join(publicDir, "video");
+    if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+
+    // 一時保存先
     const tmpDir = path.join(process.cwd(), "tmp");
     if (!existsSync(tmpDir)) mkdirSync(tmpDir, { recursive: true });
 
-    // 元ファイル名・拡張子推定
-    const origName = file.name || "upload.mov";
-    const origMime = file.type || "video/quicktime";
-    const ext = path.extname(origName).toLowerCase() || ".mov";
+    // まず一時ファイルに書き出し
+    const bytes = Buffer.from(await file.arrayBuffer());
+    // 一時ファイルは .mov / .mp4 といった元拡張子のままでOK
+    const tmpName = `${Date.now()}_${origName}`;
+    tmpInPath = path.join(tmpDir, tmpName);
+    await fs.writeFile(tmpInPath, bytes);
 
-    const baseName = `${Date.now()}_${origName.replace(/\s+/g, "_")}`;
-    const tmpInPath = path.join(tmpDir, baseName);
-
-    await fs.writeFile(tmpInPath, buf);
-
+    // 変換が必要かどうか判定
     const needsConvert =
-      ext === ".mov" ||
-      origMime === "video/quicktime" ||
-      origMime === "" // 不明な場合も念のため変換したいなら true にしてOK
-      ;
+      mime === "video/quicktime" || MOV_EXTS.has(ext);
 
-    let finalFilename = "";
-    let finalPath = "";
+    // 出力ファイル名は UUID で衝突を避ける
+    // 変換あり：.mp4 で保存
+    // 変換なし：拡張子を維持（.mp4 など）
+    const finalName = needsConvert
+      ? `${randomUUID()}.mp4`
+      : `${randomUUID()}${ext || ".mp4"}`; // 拡張子不明時は mp4 に寄せる
+    const finalPath = path.join(outDir, finalName);
 
     if (needsConvert) {
-      // 変換先ファイル名（.mp4）
-      finalFilename = baseName.replace(/\.[^.]+$/, "") + ".mp4";
-      finalPath = path.join(videoOutDir, finalFilename);
-
+      // .mov → .mp4 (H.264/AAC)
       await new Promise<void>((resolve, reject) => {
         ffmpeg(tmpInPath)
-          // H.264 / AAC にする（互換性重視）
           .videoCodec("libx264")
           .audioCodec("aac")
           .outputOptions([
-            "-movflags +faststart", // ストリーミング再生を速く
-            "-pix_fmt yuv420p",     // 互換性の高いピクセルフォーマット
+            "-movflags +faststart", // プログレッシブ再生を早く
+            "-pix_fmt yuv420p",     // 互換性高いピクセルフォーマット
           ])
           .on("end", () => resolve())
           .on("error", (err) => reject(err))
           .save(finalPath);
       });
     } else {
-      // mp4 等ならそのまま public/video に保存
-      finalFilename = baseName;
-      finalPath = path.join(videoOutDir, finalFilename);
+      // mp4 などはそのまま配置
       await fs.copyFile(tmpInPath, finalPath);
     }
 
-    // tmp を削除（不要なら残してもOK）
-    await fs.unlink(tmpInPath).catch(() => {});
+    // 一時ファイル削除（失敗しても無視）
+    try { await fs.unlink(tmpInPath); } catch {}
 
-    // クライアントから参照するURL
-    const urlPath = `/video/${finalFilename}`;
+    // public 配下は / から直接参照できる
+    const url = `/video/${finalName}`;
 
     return NextResponse.json({
-      url: urlPath,
+      url,
       converted: needsConvert,
-      mime: needsConvert ? "video/mp4" : origMime,
-      filename: finalFilename,
+      mime: needsConvert ? "video/mp4" : mime,
+      filename: finalName,
     });
   } catch (e: any) {
     console.error("video upload error:", e);
-    return NextResponse.json({ error: e?.message ?? "upload failed" }, { status: 500 });
+    // 失敗時に一時ファイルが残っていたら掃除
+    if (tmpInPath) {
+      try { await fs.unlink(tmpInPath); } catch {}
+    }
+    return NextResponse.json(
+      { error: e?.message ?? "upload failed" },
+      { status: 500 }
+    );
   }
 }

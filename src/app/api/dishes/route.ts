@@ -1,114 +1,166 @@
-import { NextResponse } from "next/server";
+// app/api/dishes/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import type { Dishes, Dish_allergy } from "@/data/types";   // 型
 import { dishes, dish_allergy } from "@/data/mockData";     // モック配列（DB置換予定）
 import { enqueueKiriJob, startKiriPoller } from "@/lib/kiri-poller";
 
-// （重要）アプリ起動時に 1 回だけポーラーを起動。
-// 複数回呼ばれても内部で弾く実装なので安全。
+// 毎回最新を返す（App Router キャッシュ無効化）
+export const dynamic = "force-dynamic";
+
+// アプリ起動時に1回だけポーラーを起動（内部で多重起動ガード済み）
 startKiriPoller();
 
+/* ------------------ utils ------------------ */
+const toNumQ = (v: string | null): number | null => {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+const toNumU = (v: unknown): number | null => {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const n = Number(v.trim());
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+};
+
+const nextIdFrom = (arr: { id: number }[]) =>
+  arr.length ? Math.max(...arr.map((r) => r.id)) + 1 : 1;
+
+/* ------------------ GET /api/dishes ------------------ */
 /**
- * GET /api/dishes
- * - 登録済みの料理一覧を返す（モック）
+ * 返却は常に配列。
+ * - /api/dishes?restaurantId=10
+ * - /api/dishes?restaurantId=10&dishId=2  → [単一 or 空配列]
+ * - /api/dishes?dishId=2                  → [単一 or 空配列]
  */
-export async function GET() {
-  return NextResponse.json(dishes);
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const restaurantId = toNumQ(url.searchParams.get("restaurantId"));
+    const dishId = toNumQ(url.searchParams.get("dishId"));
+
+    let list: Dishes[] = Array.isArray(dishes) ? [...dishes] : [];
+
+    if (restaurantId != null) {
+      list = list.filter((d) => d.restaurant_id === restaurantId);
+    }
+
+    if (dishId != null) {
+      const found = list.find((d) => d.id === dishId);
+      return NextResponse.json<Dishes[]>(found ? [found] : []);
+    }
+
+    return NextResponse.json<Dishes[]>(list);
+  } catch (error) {
+    console.error("GET /api/dishes error:", error);
+    return NextResponse.json({ message: "❌ 内部エラーが発生しました。" }, { status: 500 });
+  }
 }
 
+/* ------------------ POST /api/dishes ------------------ */
 /**
- * POST /api/dishes
- * - 新しい料理を追加
- * - アレルギー（dish_allergy 中間テーブル）も同時に保存
- * - Kiri での 3D モデル生成は非同期のため、ここでは video_url は未確定
- *   -> フロントは video_url が undefined の間、「生成中」表示にしておく
- *
- * 受け取り想定のボディ（JSON）
+ * 受信ボディ例:
  * {
  *   name: string;
- *   price: number | string;
+ *   price: number|string;
  *   description?: string;
- *   image_url?: string;         // /api/upload/image で保存したパス
- *   video_task_id?: string;     // ★ Kiri の serialize（= 生成ジョブID） ← 重要
- *   allergies?: number[];       // 中間テーブルへ保存するアレルギーID配列
+ *   image_url?: string;       // 画像アップAPIの保存パス
+ *   video_task_id?: string;   // Kiri の serialize（生成ジョブID）
+ *   allergies?: number[];     // 中間テーブルへ保存するアレルギーID配列
+ *   restaurant_id: number;    // ★固定廃止→ここから取得
  * }
  */
-export async function POST(req: Request) {
+type PostBody = {
+  name: string;
+  price: number | string;
+  description?: string;
+  image_url?: string;
+  video_task_id?: string;
+  allergies?: unknown;
+  restaurant_id?: number | string;
+};
+
+export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as {
-      name: string;
-      price: number | string;
-      description?: string;
-      image_url?: string;
-      video_task_id?: string;     // ← ここを使ってキューへ投入
-      allergies?: number[];
-      restaurant_id?: number;     // 将来ログインから受ける想定。今は未使用
-    };
+    const url = new URL(req.url);
+    const qRestaurantId = toNumQ(url.searchParams.get("restaurantId")); // フォールバック用（任意）
 
-    // いったん固定。ログイン導入後はセッションから取得に置換予定。
-    const restaurantId = 1;
+    const body = (await req.json()) as PostBody;
 
-    // --- 新規 ID 採番（単純に最後尾+1） ---
-    const newDishId = dishes.length > 0 ? dishes[dishes.length - 1].id + 1 : 1;
+    // 必須: name / price / restaurant_id
+    const name = String(body?.name ?? "").trim();
+    if (!name) {
+      return NextResponse.json({ message: "❌ name は必須です。" }, { status: 400 });
+    }
 
-    // --- Dish レコードを組み立て ---
+    const price = toNumU(body?.price);
+    if (price == null || price < 0) {
+      return NextResponse.json({ message: "❌ price が不正です（0以上の数値）。" }, { status: 400 });
+    }
+
+    // ✅ 固定を廃止。body.restaurant_id を優先し、なければ ?restaurantId= を使う
+    const restaurantId = toNumU(body?.restaurant_id) ?? qRestaurantId;
+    if (restaurantId == null || restaurantId <= 0) {
+      return NextResponse.json(
+        { message: "❌ restaurant_id が不正です（body か ?restaurantId= で正の数値を渡してください）。" },
+        { status: 400 }
+      );
+    }
+
+    const description = String(body?.description ?? "");
+    const image_url = String(body?.image_url ?? "");
+    const video_task_id =
+      typeof body?.video_task_id === "string" && body.video_task_id.trim()
+        ? body.video_task_id.trim()
+        : undefined;
+
+    // アレルギーID配列を正規化・重複除去
+    const allergyIds: number[] = Array.isArray(body?.allergies)
+      ? [
+          ...new Set(
+            (body!.allergies as unknown[])
+              .map((v) => toNumU(v))
+              .filter((n): n is number => n != null)
+          ),
+        ]
+      : [];
+
+    // 採番
+    const newDishId = nextIdFrom(dishes);
+
+    // Dish作成（video_url は Kiri 完了まで undefined）
     const newDish: Dishes = {
       id: newDishId,
       restaurant_id: restaurantId,
-      name: body.name,
-      price: Number(body.price),            // 数値に正規化
-      description: body.description ?? "",
-      image_url: body.image_url ?? "",
-
-      /**
-       * video_url の扱い（超重要）
-       * - ここでは Kiri の非同期生成がまだ終わっていないので確定URLは無い。
-       * - よって「undefined」のまま保存しておく。
-       * - バックグラウンドのポーラーが完成を検知したら
-       *   `dishes` の該当要素の `video_url` を
-       *   `/model/<serialize>/3DModel.obj` のような完成パスへ更新する。
-       *
-       * UI 側は:
-       * - video_url === undefined       -> 「生成中」
-       * - video_error_code が入っている -> エラー文言を表示（2001/2009 など）
-       * - video_url が文字列             -> 3Dを表示
-       */
+      name,
+      price,
+      description,
+      image_url,
       video_url: undefined,
     };
 
-    // --- モック配列に Dish を追加 ---
     dishes.push(newDish);
 
-    // --- 中間テーブル dish_allergy を保存 ---
-    const allergies = Array.isArray(body.allergies) ? body.allergies : [];
-    let nextDishAllergyId =
-      dish_allergy.length > 0 ? dish_allergy[dish_allergy.length - 1].id + 1 : 1;
-
+    // 中間テーブル作成
+    let nextLinkId = nextIdFrom(dish_allergy);
     const createdLinks: Dish_allergy[] = [];
-    for (const allergyId of allergies) {
-      if (typeof allergyId !== "number" || Number.isNaN(allergyId)) continue;
-      const link: Dish_allergy = {
-        id: nextDishAllergyId++,
-        dish: newDishId,
-        allergy: allergyId,
-      };
+    for (const allergyId of allergyIds) {
+      const link: Dish_allergy = { id: nextLinkId++, dish: newDishId, allergy: allergyId };
       dish_allergy.push(link);
       createdLinks.push(link);
     }
 
-    // --- ★ Kiri の serialize（= 生成ジョブID）をキューに投入 ---
-    //     これにより、サーバ側のポーラーが定期的に Kiri API を叩いて
-    //     完成（code=200）になったら ZIP をDL → /public/model/<serialize>/ に解凍 →
-    //     dishes の該当要素の video_url を完成パスへ更新する。
-    const taskId = body.video_task_id;
-    if (taskId && typeof taskId === "string") {
-      enqueueKiriJob(taskId, newDishId);
+    // Kiri の生成ジョブをキュー投入（完了時に dishes[].video_url を更新する想定）
+    if (video_task_id) {
+      enqueueKiriJob(video_task_id, newDishId);
     }
 
-    // --- レスポンス ---
     return NextResponse.json(
       {
-        message:
-          "✅ メニューを追加しました。3Dモデルはバックグラウンドで生成・反映されます。",
+        message: "✅ メニューを追加しました。3Dモデルはバックグラウンドで生成・反映されます。",
         dish: newDish,
         dish_allergies: createdLinks,
       },
@@ -116,49 +168,41 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("POST /api/dishes error:", error);
-    return NextResponse.json(
-      { message: "❌ メニュー追加に失敗しました" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "❌ メニュー追加に失敗しました。" }, { status: 500 });
   }
 }
 
+/* ------------------ DELETE /api/dishes ------------------ */
 /**
- * DELETE /api/dishes
- * - 指定IDの料理を削除（モック配列を直接操作）
- * - 紐づく dish_allergy も削除
- *
- * id の受け取り方:
- * - /api/dishes?id=123  もしくは  body: { "id": 123 }
+ * 指定IDの料理を削除。対応入力:
+ * - /api/dishes?id=123
+ * - body: { "id": 123 }
+ * 紐づく dish_allergy も同時に削除。
  */
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
-    // 1) クエリから id を見る
     const url = new URL(req.url);
-    const queryId = url.searchParams.get("id");
+    const q = url.searchParams.get("id");
+    let idUnknown: unknown = q;
 
-    // 2) なければボディから
-    let bodyId: unknown = undefined;
-    if (!queryId) {
+    if (!q) {
       try {
-        const body = (await req.json()) as { id?: unknown } | undefined;
-        bodyId = body?.id;
+        const b = (await req.json()) as { id?: unknown } | undefined;
+        idUnknown = b?.id;
       } catch {
         /* 空ボディは無視 */
       }
     }
 
-    const idRaw = queryId ?? bodyId;
-    const dishId = Number(idRaw);
-
-    if (!Number.isFinite(dishId) || dishId <= 0) {
+    const dishId = toNumU(idUnknown);
+    if (dishId == null || dishId <= 0) {
       return NextResponse.json(
         { message: "❌ id が不正です。?id= または JSON ボディ { id } で指定してください。" },
         { status: 400 }
       );
     }
 
-    const idx = dishes.findIndex((d: Dishes) => d.id === dishId);
+    const idx = dishes.findIndex((d) => d.id === dishId);
     if (idx === -1) {
       return NextResponse.json(
         { message: `❌ 指定された料理（id=${dishId}）は存在しません。` },

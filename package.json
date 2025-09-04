@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.879.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@react-three/drei": "^10.7.4",
+    "@react-three/fiber": "^9.3.0",
     "adm-zip": "^0.5.16",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.14",
@@ -24,6 +27,7 @@
     "react-dom": "^19.0.0",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.1.2",
+    "three": "^0.179.1",
     "unzipper": "^0.12.3"
   },
   "devDependencies": {

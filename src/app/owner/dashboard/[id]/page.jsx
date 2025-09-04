@@ -6,6 +6,7 @@ import styles from '@/styles/StoreDetailPage.module.css';
 import { useState } from 'react';     //タブ切り替え、状態保存用
 import { useParams, useSearchParams, useRouter  } from 'next/navigation';  //URLパラメータを取得するためのフック
 import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
+import Link from 'next/link';
 
 import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表示するためのコンポーネント
 import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
@@ -58,19 +59,17 @@ export default function StoreDetailPage() {
   // クエリから現在のページを取得。なければ1ページ目
   const currentPage = searchParams.get('page') || '1';
 
-  // 戻るボタンの処理を上書き
-  const goBack = () => {
-    router.push(`/owner/dashboard?page=${currentPage}`);  // ページ番号つきで戻る
-  };
-
-
   return (
     <div className={styles.wrapper}>
       {/* 固定ヘッダー部分 */}
       <div className={styles.fixedHeaderOwner}>
         {/* 戻るボタン */}
-        <div className={styles.backButton} onClick={() => window.history.back()}>
-          <span className={`material-symbols-outlined ${styles.backIcon}`}>arrow_back</span>
+        <div className={styles.backButton}>
+          <Link href={`/owner/stores/`}>
+            <span className={`material-symbols-outlined ${styles.backIcon}`}>
+              arrow_back
+            </span>
+          </Link>
         </div>
         {/* 真ん中のコンテンツ */}
         <div className={styles.centerContent}>
