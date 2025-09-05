@@ -11,11 +11,14 @@ import { useRouter } from 'next/navigation';
 import styles from '@/styles/adminhome.module.css';
 
 // 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
-import { restaurants, categories, reataurants_categories ,users} from '@/data/mockData';
+import {  } from '../api/admin-dashboard/route';
+import { restaurants,categories, reataurants_categories ,users} from '@/data/mockData';
 import { style } from '@mui/system';
 
 
 export default function Adminhome() {
+  //============= apiファイルから情報を取得してくるエリア ===============
+
   // ルーターのインスタンスを取得
   const router = useRouter();
 
