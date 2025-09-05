@@ -4,9 +4,9 @@
 import styles from '@/styles/StoreDetailPage.module.css';
 
 
-import { useState } from 'react';     //タブ切り替え、状態保存用
+import { useState, useEffect } from 'react';     //タブ切り替え、状態保存用
 import { useParams, useSearchParams, useRouter  } from 'next/navigation';  //URLパラメータを取得するためのフック
-import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
+//import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
 
 import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表示するためのコンポーネント
 import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
@@ -15,42 +15,39 @@ import StoreMenuTab from '@/components/atoms/StoreMenuTab'; // メニュータ�
 
 export default function StoreDetailPage() {
 
-  //タブ切り替え用
+  const { id } = useParams(); // /store/list/details/[id]
+  const searchParams = useSearchParams(); // ?page=3 など
+  const router = useRouter();
+
+  const currentPage = searchParams.get('page') || '1';
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('detail');
 
-  // URLのパラメータ（/store/list/details/3 → id = "3"）を取得
-  const params = useParams();
-  const searchParams = useSearchParams();  // クエリを取得
-  const router = useRouter();               // ページ遷移に使う
+   // ✅ 店舗詳細データを API から取得
+  useEffect(() => {
+    async function fetchRestaurant() {
+      try {
+        const res = await fetch(`/api/store?id=${id}`);
+        if (!res.ok) {
+          throw new Error('店舗が見つかりません');
+        }
+        const data = await res.json();
+        setRestaurant(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  // パラメータのidを数値に変換（文字列で渡ってくるため）
-  const restaurantId = parseInt(params.id, 10);
+    fetchRestaurant();
+  }, [id]);
 
-  // 該当する店舗情報を mock データから検索
-  const restaurant = restaurants.find(r => r.id === restaurantId);
+  if (loading) return <div>読み込み中...</div>;
+  if (error) return <div>{error}</div>;
 
-  // 店舗が見つからなかった場合のエラー表示
-  if (!restaurant) {
-    return <div>店舗が見つかりませんでした。</div>;
-  }
-
-  // 中間テーブルから、対象店舗に紐づくカテゴリIDを取り出し、
-  // それに該当するカテゴリ名を取得
-  const relatedCategories = reataurants_categories
-    .filter(rc => rc.restaurant_id === restaurant.id)
-    .map(rc => {
-      const category = categories.find(cat => cat.id === rc.category_id);
-      return category?.name || '';     // 存在しなければ空文字
-    });
-
-
-  // クエリから現在のページを取得。なければ1ページ目
-  const currentPage = searchParams.get('page') || '1';
-
-  // 戻るボタンの処理を上書き
-  const goBack = () => {
-    router.push(`/store/list?page=${currentPage}`);  // ページ番号つきで戻る
-  };
 
 
    return (
@@ -74,7 +71,7 @@ export default function StoreDetailPage() {
       </p>
 
       <div className={styles.categoryContainer}>
-        {relatedCategories.map((category, index) => (
+        {restaurant.categories.map((category, index) => (
           <CategoryTag key={index} label={category} selected={true} />
         ))}
       </div>
