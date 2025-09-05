@@ -5,9 +5,9 @@ import styles from "@/styles/editModal.module.css";
 import { useParams } from 'next/navigation';
 import { restaurants, reataurants_categories } from '@/data/mockData';
 
-import ApprovalsInput from "@/components/atoms/approvalsInput";
+import ApprovalsInput from "@/components/atoms/ApprovalsInput";
 import ApprovalsImg from "@/components/atoms/ApprovalsImg";
-import CategoryList from "@/components/Molecules/CategoryList";
+import CategoryList from "@/components/molecules/CategoryList";
 
 export default function EditStoreForm({ onClose }) {
   const params = useParams();

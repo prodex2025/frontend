@@ -5,7 +5,7 @@ import styles from "@/styles/editModal.module.css";
 import { useParams } from 'next/navigation';
 import { restaurants, restaurants_business_calendar } from '@/data/mockData';
 
-import BusinessHoursTable from "@/components/Molecules/BusinessHoursTable";
+import BusinessHoursTable from "@/components/molecules/BusinessHoursTable";
 
 export default function EditBusinessHoursForm({ onClose }) {
   const params = useParams();

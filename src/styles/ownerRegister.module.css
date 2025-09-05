@@ -135,3 +135,29 @@
   align-items: center;
   justify-content: center;
 }
+
+.videoPreview {
+  width: 100%;
+  height: auto;
+  max-height: 200px; /* 画像より少し大きめ */
+  object-fit: contain;
+  max-width: 100%;
+  pointer-events: auto; /* ← controls を有効化 */
+}
+
+.cancelBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10; /* ← video より前に配置 */
+}

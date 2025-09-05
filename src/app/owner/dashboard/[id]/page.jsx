@@ -3,10 +3,10 @@
 
 import styles from '@/styles/StoreDetailPage.module.css';
 
-
 import { useState } from 'react';     //タブ切り替え、状態保存用
 import { useParams, useSearchParams, useRouter  } from 'next/navigation';  //URLパラメータを取得するためのフック
 import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
+import Link from 'next/link';
 
 import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表示するためのコンポーネント
 import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
@@ -16,7 +16,8 @@ import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統�
 import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
 import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
 import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
-import EditDetailTab from '@/components/Molecules/EditDetailTab';
+import EditDetailTab from '@/components/molecules/EditDetailTab';
+import EditMenuTab from '@/components/molecules/EditMenuTab';
 
 export default function StoreDetailPage() {
 
@@ -58,19 +59,17 @@ export default function StoreDetailPage() {
   // クエリから現在のページを取得。なければ1ページ目
   const currentPage = searchParams.get('page') || '1';
 
-  // 戻るボタンの処理を上書き
-  const goBack = () => {
-    router.push(`/owner/dashboard?page=${currentPage}`);  // ページ番号つきで戻る
-  };
-
-
   return (
     <div className={styles.wrapper}>
       {/* 固定ヘッダー部分 */}
       <div className={styles.fixedHeaderOwner}>
         {/* 戻るボタン */}
-        <div className={styles.backButton} onClick={() => window.history.back()}>
-          <span className={`material-symbols-outlined ${styles.backIcon}`}>arrow_back</span>
+        <div className={styles.backButton}>
+          <Link href={`/owner/stores/`}>
+            <span className={`material-symbols-outlined ${styles.backIcon}`}>
+              arrow_back
+            </span>
+          </Link>
         </div>
         {/* 真ん中のコンテンツ */}
         <div className={styles.centerContent}>
@@ -145,7 +144,7 @@ export default function StoreDetailPage() {
       ):(
         <>
           {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
-          {activeTab === 'menu' && <EditStoreForm section="menu" />}
+          {activeTab === 'menu' && <EditMenuTab restaurant={restaurant} section="menu" />}
         </>
       )}
     </div>
