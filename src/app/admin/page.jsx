@@ -17,8 +17,6 @@ import { style } from '@mui/system';
 
 
 export default function Adminhome() {
-  //============= apiファイルから情報を取得してくるエリア ===============
-
   // ルーターのインスタンスを取得
   const router = useRouter();
 
@@ -49,17 +47,17 @@ export default function Adminhome() {
   // ＝＝＝＝＝＝＝＝＝＝関数＝＝＝＝＝＝＝＝＝＝＝
   // 初回マウントでそれぞれの店舗情報に対応するカテゴリ項目を配列で追加
   useEffect(() => {
-    const formattedShops = restaurants.map((r) => {
-      const relatedCategories = reataurants_categories
-        .filter(rc => rc.restaurant_id === r.id)
-        .map(rc => categories.find(c => c.id === rc.category_id)?.name || '');
-      return {
-        ...r,
-        categories: relatedCategories,
-      };
-    });
-    setShops(formattedShops);
-  }, []);
+    const params = new URLSearchParams();
+    if (searchText) params.set("search" , searchText);
+    if (selectedCategories.size > 0) {
+      params.set("categories",Array.from(selectedCategories).join(","));
+    }
+
+    fetch(`/api/admin-dashboard?${params.toString()}`)
+    .then((res) => res.json())
+    .then((data) => setShops(data))
+    .catch((err) => console.error("取得失敗",err));
+    },[searchText,selectedCategories]);
 
   // カテゴリ選択・解除
   const toggleCategory = (name) =>{
@@ -73,23 +71,8 @@ export default function Adminhome() {
     setSelectedCategories(updated);
   };
 
-  // 検索テキスト、カテゴリ条件でフィルタ
-  const filteredShops = shops.filter(shop => {
-    // undefinedなら空配列にする
-    const shopCategories = shop.categories || [];
-    // カテゴリでフィルタ
-    const matchesCategory =
-      selectedCategories.size === 0 || shop.categories.some(cat => selectedCategories.has(cat));
-    
-    // 検索バーのテキストで店舗名をフィルタ
-    const matchesSearch = shop.name.toLowerCase().includes(searchText.toLowerCase());
-
-    return matchesCategory && matchesSearch;
-  })
-
-
   // storedetailの表示を切り替えている店舗を探す
-  const openShop = filteredShops.find(r => r.id === openId);
+  const openShop = shops.find(r => r.id === openId);
 
 
   return (
@@ -166,7 +149,7 @@ export default function Adminhome() {
         <div className={styles.tablearea}>
           {/* 承認済み店舗一覧 */}
           {selectedKind === "承認済み" && (() => {
-            const approvedShops = filteredShops.filter(r => r.approved);
+            const approvedShops = shops.filter(r => r.approved);
 
             return approvedShops.length > 0 ?(
               <table className={styles.storeRequestList}>
@@ -226,7 +209,7 @@ export default function Adminhome() {
 
           {/* 未承認一覧を表示 */}
           {selectedKind === "未承認" && (() => {
-            const unapprovedShops = filteredShops.filter(r => !r.approved);
+            const unapprovedShops = shops.filter(r => !r.approved);
 
             return unapprovedShops.length > 0 ?(
               <table className={styles.storeRequestList}>
@@ -286,7 +269,7 @@ export default function Adminhome() {
 
           {/* 公開済み一覧を表示 */}
           {selectedKind === "公開済み" &&(() => {
-            const publishedShops = filteredShops.filter(r => r.isPublished);
+            const publishedShops = shops.filter(r => r.isPublished);
 
             return publishedShops.length > 0 ? (
               <div className={styles.visibleshops}>
@@ -386,7 +369,7 @@ export default function Adminhome() {
 
           {/* 非公開一覧を表示 */}
           {selectedKind === "非公開" &&(() => {
-            const unpublishedShops = filteredShops.filter(r => !r.isPublished);
+            const unpublishedShops = shops.filter(r => !r.isPublished);
 
             return unpublishedShops.length > 0 ? (
               <div className={styles.visibleshops}>
