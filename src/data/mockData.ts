@@ -326,7 +326,7 @@ export const dishes:Dishes[] = [
     price:420,
     description:'パスタ',
     image_url:'@/image/pasuta.png',
-    video_url:'@/video/menu.mp4',
+    video_url:'40c245d593a44e91ad97d81828e9cc64',
   },
   {
     id:3,
