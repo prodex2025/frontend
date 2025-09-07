@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { restaurants,categories, reataurants_categories} from "@/data/mockData";
+import { restaurants,categories, reataurants_categories,users} from "@/data/mockData";
 
 export const dynamic = "force-dynamic";
 
@@ -37,5 +37,11 @@ export async function GET(req:Request){
     return matchesCategory && matchesSearch;
   });
 
-  return NextResponse.json(filteredShops);
+  // フィルタ済み店舗 + users + restaurants_categories をまとめて返す
+  return NextResponse.json({
+    shops:filteredShops,
+    users:users,
+    categories:categories,
+    restaurants_categories:reataurants_categories
+  });
 }
