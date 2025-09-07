@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation';
 import styles from '@/styles/adminhome.module.css';
 
 // 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
-import {  } from '../api/admin-dashboard/route';
-import { restaurants,categories, reataurants_categories ,users} from '@/data/mockData';
+import {  } from '../api/admin/stores/route';
+import { categories, reataurants_categories ,users} from '@/data/mockData';
 import { style } from '@mui/system';
 
 
@@ -20,6 +20,9 @@ export default function Adminhome() {
   // ルーターのインスタンスを取得
   const router = useRouter();
 
+  //  ローディング状態のステータスを追加
+  const [loading, setLoading] = useState(true); //  ローディング状態を追加
+  
   // 現在選択されているカテゴリ名の集合
   const [selectedCategories,setSelectedCategories] = useState(new Set());
   // 検索バーに入力されたテキスト
@@ -53,10 +56,11 @@ export default function Adminhome() {
       params.set("categories",Array.from(selectedCategories).join(","));
     }
 
-    fetch(`/api/admin-dashboard?${params.toString()}`)
+    setLoading(true); // ← 取得開始時に true にする
+    fetch(`/api/admin/stores?${params.toString()}`)
     .then((res) => res.json())
-    .then((data) => setShops(data))
-    .catch((err) => console.error("取得失敗",err));
+    .then((data) => {setShops(data);setLoading(false);}) // ← 取得完了で false に)
+    .catch((err) => {console.error("取得失敗",err);setLoading(false);}); // エラー時も false に
     },[searchText,selectedCategories]);
 
   // カテゴリ選択・解除
@@ -149,6 +153,10 @@ export default function Adminhome() {
         <div className={styles.tablearea}>
           {/* 承認済み店舗一覧 */}
           {selectedKind === "承認済み" && (() => {
+            // データ取得中の表示
+            if(loading){
+              return <p className={styles.nothing}>読み込み中です…</p>
+            }
             const approvedShops = shops.filter(r => r.approved);
 
             return approvedShops.length > 0 ?(
@@ -209,6 +217,10 @@ export default function Adminhome() {
 
           {/* 未承認一覧を表示 */}
           {selectedKind === "未承認" && (() => {
+            // データ取得中の表示
+            if(loading){
+              return <p className={styles.nothing}>読み込み中です…</p>
+            }
             const unapprovedShops = shops.filter(r => !r.approved);
 
             return unapprovedShops.length > 0 ?(
@@ -269,6 +281,10 @@ export default function Adminhome() {
 
           {/* 公開済み一覧を表示 */}
           {selectedKind === "公開済み" &&(() => {
+            // データ取得中の表示
+            if(loading){
+              return <p className={styles.nothing}>読み込み中です…</p>
+            }
             const publishedShops = shops.filter(r => r.isPublished);
 
             return publishedShops.length > 0 ? (
@@ -369,6 +385,10 @@ export default function Adminhome() {
 
           {/* 非公開一覧を表示 */}
           {selectedKind === "非公開" &&(() => {
+            // データ取得中の表示
+            if(loading){
+              return <p className={styles.nothing}>読み込み中です…</p>
+            }
             const unpublishedShops = shops.filter(r => !r.isPublished);
 
             return unpublishedShops.length > 0 ? (
