@@ -16,7 +16,7 @@ import ApprovalsVideo from "@/components/atoms/ApprovalsVideo";
  * - 動画は /api/kiri_upload に中継 → Kiriの serialize(=taskId) を保持して「生成中」状態に
  * - /api/dishes に video_task_id として登録（生成完了後に別フローで video_url を確定）
  */
-export default function EditMenuRegistartionForm({ onSuccess, onCancel }) {
+export default function EditMenuRegistartionForm({ restaurantId,onSuccess, onCancel }) {
   const [selectedAllergies, setSelectedAllergies] = useState([]); // アレルギー選択状態
   const [loading, setLoading] = useState(false);                   // API通信中フラグ
   const [errorMsg, setErrorMsg] = useState("");                    // エラー表示
@@ -56,6 +56,10 @@ export default function EditMenuRegistartionForm({ onSuccess, onCancel }) {
       }
       if (!name) throw new Error("料理名は必須です。");
       if (Number.isNaN(priceNum) || priceNum < 0) throw new Error("価格は0以上の数値で入力してください。");
+
+      if (!Number.isFinite(Number(restaurantId)) || Number(restaurantId) <= 0) {
+        throw new Error("店舗IDが取得できません。画面を再読み込みしてください。");
+      }
 
       // --- 画像アップロード ---
       let imageUrl = "";
@@ -100,8 +104,9 @@ export default function EditMenuRegistartionForm({ onSuccess, onCancel }) {
         price: priceNum,
         description: String(formData.get("description") || ""),
         image_url: imageUrl,
-        video_task_id: videoTaskId, // ← 生成ジョブのIDを保持。UI側で「生成中」を表示できる
+        video_url: videoTaskId, // ← 生成ジョブのIDを保持。UI側で「生成中」を表示できる
         allergies: selectedAllergies, // ← 別テーブルに保存する場合はAPI側で分解して保存
+        restaurant_id: Number(restaurantId), 
       };
 
       // --- 登録（モック配列に追加するAPI） ---

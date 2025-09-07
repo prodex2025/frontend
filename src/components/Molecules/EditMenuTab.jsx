@@ -134,6 +134,7 @@ export default function EditMenuTab({ restaurant }) {
       {/* モーダル */}
       <EditStoreModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <EditMenuRegistartionForm
+          restaurantId={restaurant.id}
           dish={editingDish}
           isAdding={isAdding}
           onSuccess={async()=>{
