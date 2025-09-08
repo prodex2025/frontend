@@ -7,6 +7,7 @@
   place-items: center;
   padding: 24px 20px 92px;
   position: relative;
+  --content-max: 920px;
 }
 
 .backButton {
@@ -15,7 +16,7 @@
   left: 24px;
   border: 1.5px solid white;
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px 6px 0 6px;
   cursor: pointer;
   z-index: 1000; /* 必要に応じて他UIの上に */
   display: flex;
@@ -32,8 +33,9 @@
 
 /* タイトル */
 .titles {
-  width: 100%;
-  max-width: 980px;
+  width: min(var(--content-max), 94vw);
+  max-width: none;
+  margin-inline: auto;
   text-align: left;
   position: relative;
 }
@@ -50,7 +52,7 @@
   content: "";
   position: absolute;
   left: -10%;
-  bottom: 4px; /* テキストと下線の間隔 */
+  bottom: 8px; /* テキストと下線の間隔 */
   width: 120%;  /* テキスト幅にだけ下線 */
   height: 3px;  /* 下線の太さ */
   background-color: #fff; /* シンプルな白線 */
@@ -80,7 +82,7 @@
 }
 
 .dockInner {
-  width: min(920px, 94vw);
+  width: min(var(--content-max), 94vw);
   background: #151821;
   border-radius: 14px;
   padding: 14px 18px;
@@ -153,9 +155,12 @@
 /* 既存の .bowl が固定高さでない場合は、適度な高さを与える */
 .bowl {
   position: relative;
-  width: 60%;
+  border: none;
+  width: min(var(--content-max), 94vw);
   height: 360px;          /* お好みで */
+  color: white;
   border-radius: 16px;
-  border:  1px solid ;
-  margin-bottom: 5%;
+  margin: 2% 0;
+  background-color: #151821;
+  text-align: center;
 }

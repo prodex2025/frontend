@@ -12,6 +12,14 @@ const toNumOrNull = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
+const normalizeBase = (folder) => {
+  if (!folder) return null;
+  let f = String(folder).replace(/\/+$/g, "");
+  if (f.startsWith("@/model")) f = f.replace(/^@\/model/, "/model");
+  else if (!f.startsWith("/model")) f = `/model/${f}`;
+  return `${f}/`;
+};
+
 // アレルギーアイコン（/public/image/allergy/{id}.svg → .png の順でフォールバック）
 function AllergyBadge({ id, name }) {
   const [src, setSrc] = useState(`/image/allergy/${id}.svg`);
@@ -51,10 +59,17 @@ export default function Page() {
   const [error, setError] = useState("");
 
   const [selectedDish, setSelectedDish] = useState(null);
+  const [modelReady, setModelReady] = useState(null);
 
   // アレルギー関連
   const [allergyIds, setAllergyIds] = useState([]);      // number[]
   const [allergyNameById, setAllergyNameById] = useState({}); // { [id]: name }
+
+  // video_url からベースパスを生成
+  const modelBase = useMemo(
+    () => normalizeBase(selectedDish?.video_url),
+    [selectedDish?.video_url]
+  );
 
   // 1) 対象メニュー取得
   useEffect(() => {
@@ -95,6 +110,34 @@ export default function Page() {
     run();
     return () => ac.abort();
   }, [restaurantId, menuId]);
+
+  // 1.5) モデルファイル存在チェック（OBJ/MTL/PNG すべて必須）
+  useEffect(() => {
+    let aborted = false;
+    async function check() {
+      // video_url が未設定なら未準備扱い
+      if (!modelBase) {
+        setModelReady(false);
+        return;
+      }
+      setModelReady(null); // 確認中
+      try {
+        const [mtl, obj, jpg] = await Promise.all([
+          fetch(`${modelBase}3DModel.mtl`, { method: "HEAD", cache: "no-store" }),
+          fetch(`${modelBase}3DModel.obj`, { method: "HEAD", cache: "no-store" }),
+          fetch(`${modelBase}3DModel.jpg`, { method: "HEAD", cache: "no-store" }),
+        ]);
+        const ok = mtl.ok && obj.ok && jpg.ok;
+        if (!aborted) setModelReady(ok);
+      } catch {
+        if (!aborted) setModelReady(false);
+      }
+    }
+    check();
+    return () => {
+      aborted = true;
+    };
+  }, [modelBase]);
 
   // 2) 中間テーブルから該当dishのアレルギーID一覧取得
   useEffect(() => {
@@ -180,11 +223,13 @@ export default function Page() {
 
       {/*  3Dの表示部分 */}
       <div className={styles.bowl}>
-        {!selectedDish && <p className={styles.statusText}>読み込み中...</p>}
-        {selectedDish && !selectedDish.video_url && (
+        {!selectedDish ? (
+          <p className={styles.statusText}>読み込み中...</p>
+        ) : modelReady === null ? (
+          <p className={styles.statusText}>3Dモデルを確認中...</p>
+        ) : modelReady === false ? (
           <p className={styles.statusText}>3Dモデルはまだ準備中です。</p>
-        )}
-        {selectedDish?.video_url && (
+        ) : (
           <ThreeModelViewer folder={selectedDish.video_url} />
         )}
       </div>

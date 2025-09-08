@@ -206,3 +206,30 @@
   font-weight: bold;
   pointer-events: none; /* クリック無効化して入力に干渉しない */
 }
+
+.plateViewer {
+  width: 100%;
+  height: 320px;                  /* ← これが無いとキャンバスが見えない */
+  background: #151821;
+  border: 1px solid var(--edge, rgba(255,255,255,.15));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.plateGrid{
+  display: flex;
+  flex-direction: row;
+  margin: 5px 4px;
+  gap: 8px;
+}
+
+.plateBtn{
+  padding: 4px 8px;
+  border:1px solid #979797;
+  border-radius: 16px;
+}
+
+.plateBtnSelected{
+  background-color: #419f44;
+  color: white;
+}

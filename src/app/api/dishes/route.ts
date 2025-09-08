@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
  *   price: number|string;
  *   description?: string;
  *   image_url?: string;       // 画像アップAPIの保存パス
- *   video_task_id?: string;   // Kiri の serialize（生成ジョブID）
+ *   video_url?: string;   // Kiri の serialize（生成ジョブID）
  *   allergies?: number[];     // 中間テーブルへ保存するアレルギーID配列
  *   restaurant_id: number;    // ★固定廃止→ここから取得
  * }
@@ -78,7 +78,7 @@ type PostBody = {
   price: number | string;
   description?: string;
   image_url?: string;
-  video_task_id?: string;
+  video_url?: string;
   allergies?: unknown;
   restaurant_id?: number | string;
 };
@@ -113,8 +113,8 @@ export async function POST(req: NextRequest) {
     const description = String(body?.description ?? "");
     const image_url = String(body?.image_url ?? "");
     const video_task_id =
-      typeof body?.video_task_id === "string" && body.video_task_id.trim()
-        ? body.video_task_id.trim()
+      typeof body?.video_url === "string" && body.video_url.trim()
+        ? body.video_url.trim()
         : undefined;
 
     // アレルギーID配列を正規化・重複除去
