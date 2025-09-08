@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from '@/styles/StoreDetailTab.module.css';
 import dynamic from 'next/dynamic';
-import { restaurants_business_calendar } from '@/data/mockData'; 
+//import { restaurants_business_calendar } from '@/data/mockData'; 
 
 
 // dynamic importでSSRオフにする
@@ -40,9 +40,7 @@ export default function StoreDetailTab({ restaurant }) {
   if (!restaurant) return null;
 
   // 対象店舗の営業時間だけ抽出
-  const businessHours = restaurants_business_calendar.filter(
-    (b) => b.restaurant_id === restaurant.id
-  );
+  const businessHours = restaurant.business_hours || [];
 
   // 営業日(曜日番号)リスト
   const openDays = businessHours.map((b) => b.day_of_week);

@@ -12,7 +12,7 @@ import ShopCard from '@/components/atoms/ShopCard.jsx';             //ショッ�
 import Pagination from '@/components/atoms/Pagination.jsx';         //ページネーション用コンポーネント
 
 // 仮のデータセットをインポート（店舗・カテゴリ・関連テーブル）
-import { restaurants, categories, reataurants_categories } from '@/data/mockData';
+//import { restaurants, categories, reataurants_categories } from '@/data/mockData';
 
 import { useState, useEffect, useRef } from 'react';    // React の状態管理と副作用フック
 import { useSearchParams, useRouter } from 'next/navigation';   //ページ移動用
@@ -27,17 +27,44 @@ export default function HomePage() {
   const searchParams = useSearchParams();  // URLのクエリを取得
   const router = useRouter();
 
-  // URLのpageクエリを初期値に使う。なければ1
+  // ページ番号管理（URLのpageクエリを初期値に使う。なければ1）
   const initialPage = parseInt(searchParams.get('page')) || 1;
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  // すべての店舗情報を保持（加工された状態）
+  // 取得した店舗データとカテゴリデータを分けて管理
   const [shops, setShops] = useState([]);
+  const [categories, setCategories] = useState([]);
+  
   //店舗検索用
   const [searchText, setSearchText] = useState('');
 
   //ページネーション用（１ページに１０件ずつ）
   const itemsPerPage = 10;                            // 1ページに表示する店舗数
+
+   // --- 初回：カテゴリ一覧のみ取得 ---
+  useEffect(() => {
+    fetch('/api/store') // クエリなしで全カテゴリを取得
+      .then(res => res.json())
+      .then(data => {
+        setCategories(data.categories);
+      })
+      .catch(err => console.error('カテゴリ取得エラー:', err));
+  }, []);
+
+  // --- フィルタ変更時：店舗データ取得 ---
+  useEffect(() => {
+    const categoriesQuery = Array.from(selected).join(',');
+    const query = new URLSearchParams();
+    if (searchText) query.set('keyword', searchText);
+    if (categoriesQuery) query.set('categories', categoriesQuery);
+
+    fetch(`/api/store?${query.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        setShops(data.stores);
+      })
+      .catch(err => console.error('店舗データ取得エラー:', err));
+  }, [selected, searchText]);
 
   // URLのpageが変わったらcurrentPageを更新
   useEffect(() => {
@@ -47,27 +74,20 @@ export default function HomePage() {
     }
   }, [searchParams]);
 
-  // カテゴリー選択に応じて表示する店舗一覧（リアルタイムでフィルタ）
-  const filteredShops = shops.filter((shop) => {
-  const matchesCategory =
-    selected.size === 0 || shop.categories.some((cat) => selected.has(cat));
+  // --- ページ変更でスクロール位置をトップに ---
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
-  const lowerSearch = searchText.toLowerCase();
-
-  // 検索欄での検索は「店舗名」のみに絞る！
-  const matchesSearch = shop.name.toLowerCase().includes(lowerSearch);
-
-  return matchesCategory && matchesSearch;
-});
-
- // ページ分割された店舗リスト
-  const totalPages = Math.ceil(filteredShops.length / itemsPerPage);
-  const paginatedShops = filteredShops.slice(
+  // --- 店舗フィルター後のページング処理 ---
+  const totalPages = Math.ceil(shops.length / itemsPerPage);
+  const paginatedShops = shops.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //次のページへの移動用
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -75,46 +95,38 @@ export default function HomePage() {
     }
   };
 
-  // 初回マウント時に mock データを加工して shops にセット    
-  useEffect(() => {
-    const formattedShops = restaurants.map((restaurant) => {
-      // 1つの店舗に対して、関連付けられたカテゴリ名一覧を取得
-      const relatedCategories = reataurants_categories
-        .filter(rc => rc.restaurant_id === restaurant.id)   // 対象店舗に関連するレコードだけ
-        .map(rc => {
-          const category = categories.find(cat => cat.id === rc.category_id);
-          return category?.name || '';       // 存在しなければ空文字を返す
-        });
-
-      return {
-        id: restaurant.id,
-        name: restaurant.name,
-        address: restaurant.address,
-        categories: relatedCategories,
-        imageUrl: restaurant.image_url || '/default-shop.png',
-      };
-    });
-
-    setShops(formattedShops);    // 加工済み店舗データをステートに保存
-  }, []);
-
-  // currentPageが変わったら、ページトップにスクロールする
-  useEffect(() => {
-  if (scrollAreaRef.current) {
-    scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-}, [currentPage]);
-
-  // タグをクリックした時に呼ばれる関数（ON/OFFの切り替え）
+  // --- カテゴリー選択トグル ---
   const toggleCategory = (name) => {
-    const updated = new Set(selected);    // 現在の選択状態をコピー
-    updated.has(name) ? updated.delete(name) : updated.add(name);   // トグル処理
-    setSelected(updated);    // 新しい選択状態を保存
+    const updated = new Set(selected);
+    updated.has(name) ? updated.delete(name) : updated.add(name);
+    setSelected(updated);
 
-    setCurrentPage(1); // フィルタ変更時に1ページ目に戻す
-     router.push(`/store/list?page=1`, { scroll: false });
-
+    setCurrentPage(1);
+    router.push(`/store/list?page=1`, { scroll: false });
   };
+
+  // --- 検索テキスト入力時 ---
+  const onSearchChange = (e) => {
+    setSearchText(e.target.value);
+    setCurrentPage(1);
+    router.push(`/store/list?page=1`, { scroll: false });
+  };
+
+  // フィルターエリアの横スクロール制御
+  const filterScrollRef = useRef(null);
+
+  const scrollCategoryLeft = () => {
+    if (filterScrollRef.current) {
+        filterScrollRef.current.scrollBy({ left: -550, behavior: 'smooth' });
+    }
+  };
+
+  const scrollCategoryRight = () => {
+    if (filterScrollRef.current) {
+      filterScrollRef.current.scrollBy({ left: 550, behavior: 'smooth' });
+    }
+  };
+
 
   return (
     <div className={styles.wrapper}>
@@ -131,12 +143,12 @@ export default function HomePage() {
        {/* カテゴリータグ + 横スクロール矢印 */}
         <div className={styles.filterScrollWrapper}>
           {/* ← 左矢印（アイコンを左右反転） */}
-          <span className={`material-symbols-outlined ${styles.scrollIcon} ${styles.left}`}>
+          <span className={`material-symbols-outlined ${styles.scrollIcon} ${styles.left}`} onClick={scrollCategoryLeft}>
             expand_circle_right
           </span>
 
           {/* 横スクロール領域 */}
-          <div className={styles.filterScroll}>
+          <div className={styles.filterScroll} ref={filterScrollRef}>
             <div className={styles.filterButtons}>
               {/* 全カテゴリをタグとして表示 */}
               {categories.map((category) => (
@@ -152,7 +164,7 @@ export default function HomePage() {
           </div>
 
           {/* → 右矢印 */}
-          <span className={`material-symbols-outlined ${styles.scrollIcon}`}>
+          <span className={`material-symbols-outlined ${styles.scrollIcon}`} onClick={scrollCategoryRight}>
             expand_circle_right
           </span>
         </div>
