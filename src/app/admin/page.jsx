@@ -10,20 +10,32 @@ import { useRouter } from 'next/navigation';
 // このページ専用のCSSファイルの読み込み
 import styles from '@/styles/adminhome.module.css';
 
-// 仮のデータセットをインポート（店舗・カテゴリ・店舗ごとのカテゴリーテーブル）
-import { restaurants, categories, reataurants_categories ,users} from '@/data/mockData';
-import { style } from '@mui/system';
+// コンポーネントの読み込み
+import ShopTable from "@/components/atoms/admin-shopTable";
+import ShopCards from "@/components/atoms/admin-shopCards";
 
 
 export default function Adminhome() {
   // ルーターのインスタンスを取得
   const router = useRouter();
 
+  //  ローディング状態のステータスを追加
+  const [loading, setLoading] = useState(true); //  ローディング状態を追加
+  
   // 現在選択されているカテゴリ名の集合
   const [selectedCategories,setSelectedCategories] = useState(new Set());
   // 検索バーに入力されたテキスト
   const [searchText, setSearchText] = useState('');
   const [shops,setShops] = useState([]);
+
+  // usersデータをapiファイルから取得
+  const [users, setUsers] = useState([]);
+
+  // categoriesデータをapiファイルから取得
+  const [categories,setCategories] = useState([]);
+  
+  // restaurantsCategoriesデータをapiファイルから取得
+  const [restaurantsCategories, setRestaurantsCategories] = useState([]);
 
   // カテゴリー編集モーダル表示ステータス
   const [isModalopen,setModalOpen] = useState(false);
@@ -46,17 +58,24 @@ export default function Adminhome() {
   // ＝＝＝＝＝＝＝＝＝＝関数＝＝＝＝＝＝＝＝＝＝＝
   // 初回マウントでそれぞれの店舗情報に対応するカテゴリ項目を配列で追加
   useEffect(() => {
-    const formattedShops = restaurants.map((r) => {
-      const relatedCategories = reataurants_categories
-        .filter(rc => rc.restaurant_id === r.id)
-        .map(rc => categories.find(c => c.id === rc.category_id)?.name || '');
-      return {
-        ...r,
-        categories: relatedCategories,
-      };
-    });
-    setShops(formattedShops);
-  }, []);
+    const params = new URLSearchParams();
+    if (searchText) params.set("search" , searchText);
+    if (selectedCategories.size > 0) {
+      params.set("categories",Array.from(selectedCategories).join(","));
+    }
+
+    setLoading(true); // ← 取得開始時に true にする
+    fetch(`/api/admin/stores?${params.toString()}`)
+    .then((res) => res.json())
+    .then((data) => {
+      setShops(data.shops);    // フィルタ済みの店舗データを取得
+      setUsers(data.users);    // usersデータを取得
+      setCategories(data.categories);  // categoriesデータを取得
+      setRestaurantsCategories(data.restaurants_categories);    // restaurants_categoriesデータを取得
+      setLoading(false); // ← 取得完了で false に
+    })
+    .catch((err) => {console.error("取得失敗",err);setLoading(false);}); // エラー時も false に
+    },[searchText,selectedCategories]);
 
   // カテゴリ選択・解除
   const toggleCategory = (name) =>{
@@ -70,24 +89,8 @@ export default function Adminhome() {
     setSelectedCategories(updated);
   };
 
-  // 検索テキスト、カテゴリ条件でフィルタ
-  const filteredShops = shops.filter(shop => {
-    // undefinedなら空配列にする
-    const shopCategories = shop.categories || [];
-    // カテゴリでフィルタ
-    const matchesCategory =
-      selectedCategories.size === 0 || shop.categories.some(cat => selectedCategories.has(cat));
-    
-    // 検索バーのテキストで店舗名をフィルタ
-    const matchesSearch = shop.name.toLowerCase().includes(searchText.toLowerCase());
-
-    return matchesCategory && matchesSearch;
-  })
-
-
   // storedetailの表示を切り替えている店舗を探す
-  const openShop = filteredShops.find(r => r.id === openId);
-
+  const openShop = shops.find(r => r.id === openId);
 
   return (
     <div className={styles.container}>
@@ -161,324 +164,43 @@ export default function Adminhome() {
 
         {/* 表を表示するエリア */}
         <div className={styles.tablearea}>
-          {/* 承認済み店舗一覧 */}
-          {selectedKind === "承認済み" && (() => {
-            const approvedShops = filteredShops.filter(r => r.approved);
+          {loading ? (
+            <p className={styles.nothing}>読み込み中です…</p>
+          ) : (
+            <>
+            {selectedKind === "承認済み" && (
+              <ShopTable shops={shops.filter((r) => r.approved)} users={users} router={router} />
+            )}
 
-            return approvedShops.length > 0 ?(
-              <table className={styles.storeRequestList}>
-              <thead>
-                <tr>
-                  <th>店舗名</th>
-                  <th>申請者名</th>
-                  <th>店舗ページ公開ステータス</th>
-                  <th>承認日</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approvedShops
-                  .map((r) => {
-                  // owner_id に一致するユーザーを探す
-                  const owner = users.find(u => u.id === r.owner_id);
-                  
-                  return(
-                  <tr
-                    key={r.id}
-                    className={styles.requeststore}
-                    // 行クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
-                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
-                  >
-                    <td>{r.name}</td>
-                    <td>{owner ? owner.name : "不明"}</td>
-                    <td>{r.isPublished ? '公開済み' : '非公開'}</td>
-                    <td>
-                      {r.approved
-                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          })
-                        : r.applicationData
-                        ? new Date(r.applicationData).toLocaleDateString('ja-JP', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          })
-                        : 'ー'}
-                    </td>
-                  </tr>
-                );
-              })}
-              </tbody>
-            </table>
-            ):(
-            <p className={styles.nothing}>該当する店舗はありません</p>
-            );
-          })()}
+            {selectedKind === "未承認" && (
+              <ShopTable shops={shops.filter((r) => !r.approved)} users={users} router={router} />
+            )} 
 
+            {selectedKind === "公開済み" && (
+              <ShopCards
+                shops={shops.filter((r) => r.isPublished)}
+                categories={categories}
+                restaurants_categories={restaurantsCategories}
+                router={router}
+                openId={openId}
+                setOpenId={setOpenId}
+                setPrivateModal={setPrivateModal}
+              />
+            )}
 
-          {/* 未承認一覧を表示 */}
-          {selectedKind === "未承認" && (() => {
-            const unapprovedShops = filteredShops.filter(r => !r.approved);
-
-            return unapprovedShops.length > 0 ?(
-              <table className={styles.storeRequestList}>
-              <thead>
-                <tr>
-                  <th>店舗名</th>
-                  <th>申請者名</th>
-                  <th>店舗ページ公開ステータス</th>
-                  <th>申請日</th>
-                </tr>
-              </thead>
-              <tbody>
-                {unapprovedShops
-                  .map((r) => {
-                  // owner_id に一致するユーザーを探す
-                  const owner = users.find(u => u.id === r.owner_id);
-                  
-                  return(
-                  <tr
-                    key={r.id}
-                    className={styles.requeststore}
-                    // 行クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
-                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
-                  >
-                    <td>{r.name}</td>
-                    <td>{owner ? owner.name : "不明"}</td>
-                    <td>{r.isPublished ? '公開済み' : '非公開'}</td>
-                    <td>
-                      {r.approved
-                        ? new Date(r.approvalDate).toLocaleDateString('ja-JP', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          })
-                        : r.applicationData
-                        ? new Date(r.applicationData).toLocaleDateString('ja-JP', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          })
-                        : 'ー'}
-                    </td>
-                  </tr>
-                );
-              })}
-              </tbody>
-            </table>
-            ):(
-            <p className={styles.nothing}>該当する店舗はありません</p>
-            );
-          })()}
-
-
-          {/* 公開済み一覧を表示 */}
-          {selectedKind === "公開済み" &&(() => {
-            const publishedShops = filteredShops.filter(r => r.isPublished);
-
-            return publishedShops.length > 0 ? (
-              <div className={styles.visibleshops}>
-                {publishedShops.map((r) => (
-                  <div 
-                    key={r.id} 
-                    className={styles.visibleshop}
-                    // 店舗クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
-                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
-                  >
-                    {/* 店舗の写真 */}
-                    <img
-                      src={r.image_url}
-                      alt={r.name}
-                      className={styles.storephoto}
-                    />
-                    {/* 店舗の情報（簡易） */}
-                    <div className={styles.storedetail + (openId === r.id ? `${styles.open}` : "")}>
-                      {openId === r.id ? (
-                        // 展開時に見せたい内容
-                        <div className={styles.openContent}>
-                          <p className={styles.storename}>
-                          {/* ９文字以上の店舗名を開業する処理 */}
-                            {r.name.length > 8
-                              ? (
-                                <>
-                                  {r.name.slice(0, 8)}<br />
-                                  {r.name.slice(8)}
-                                </>
-                              )
-                              : r.name
-                            }
-                          </p>
-                          <p 
-                            className={styles.privatebutton} 
-                            onClick={(e) =>{
-                              e.stopPropagation();
-                              setPrivateModal(true);
-                            }}>
-                            非公開にする
-                          </p>
-                          <p 
-                            className={styles.smalltext}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/admin/store-detail?id=${r.id}`)
-                            }}
-                          >
-                            この店舗の詳細ページへ
-                          </p>
-                        </div>
-                      ) : (
-                        // 閉じているときに見せたい内容
-                        <div className={styles.closedContent}>
-                          <p className={styles.storename}>
-                          {/* ９文字以上の店舗名を開業する処理 */}
-                            {r.name.length > 8
-                              ? (
-                                <>
-                                  {r.name.slice(0, 8)}<br />
-                                  {r.name.slice(8)}
-                                </>
-                              )
-                              : r.name
-                            }
-                          </p>
-                          <p className={styles.storeadress}>{r.address}</p>
-                          {/* 店舗ごとのカテゴリーを表示 */}
-                          <p  className={styles.storecategory}>
-                            {reataurants_categories
-                              .filter(rc => rc.restaurant_id === r.id)
-                              .map(rc => categories.find(c => c.id === rc.category_id) ?.name ?? "不明")
-                              .join("/")
-                            }
-                          </p>
-                        </div>
-                      )}
-                      
-                      <span
-                        className={`material-symbols-outlined ${styles.displaychange}`}
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          setOpenId(openId === r.id ? null : r.id);
-                        }}
-                      >
-                      more_vert
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className={styles.nothing}>該当する店舗はありません</p>
-            );
-          })()}
-          
-
-          {/* 非公開一覧を表示 */}
-          {selectedKind === "非公開" &&(() => {
-            const unpublishedShops = filteredShops.filter(r => !r.isPublished);
-
-            return unpublishedShops.length > 0 ? (
-              <div className={styles.visibleshops}>
-                {unpublishedShops.map((r) => (
-                  <div 
-                    key={r.id} 
-                    className={styles.visibleshop}
-                    // 店舗クリックでdetailページに移動し、選択した店舗のidをクエリパラメータとして渡す
-                    onClick={() => router.push(`/admin/store-detail?id=${r.id}`)}
-                  >
-                    {/* 店舗の写真 */}
-                    <img
-                      src={r.image_url}
-                      alt={r.name}
-                      className={styles.storephoto}
-                    />
-                    {/* 店舗の情報（簡易） */}
-                    <div className={styles.storedetail + (openId === r.id ? `${styles.open}` : "")}>
-                      {openId === r.id ? (
-                        // 展開時に見せたい内容
-                        <div className={styles.openContent}>
-                          <p className={styles.storename}>
-                          {/* ９文字以上の店舗名を開業する処理 */}
-                            {r.name.length > 8
-                              ? (
-                                <>
-                                  {r.name.slice(0, 8)}<br />
-                                  {r.name.slice(8)}
-                                </>
-                              )
-                              : r.name
-                            }
-                          </p>
-                          <p 
-                            className={styles.privatebutton} 
-                            onClick={(e) =>{
-                              e.stopPropagation();
-                              setPrivateModal(true);
-                            }}>
-                            非公開にする
-                          </p>
-                          <p 
-                            className={styles.smalltext}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/admin/store-detail?id=${r.id}`)
-                            }}
-                          >
-                            この店舗の詳細ページへ
-                          </p>
-                        </div>
-                      ) : (
-                        // 閉じているときに見せたい内容
-                        <div className={styles.closedContent}>
-                          <p className={styles.storename}>
-                          {/* ９文字以上の店舗名を開業する処理 */}
-                            {r.name.length > 8
-                              ? (
-                                <>
-                                  {r.name.slice(0, 8)}<br />
-                                  {r.name.slice(8)}
-                                </>
-                              )
-                              : r.name
-                            }
-                          </p>
-                          <p className={styles.storeadress}>{r.address}</p>
-                          {/* 店舗ごとのカテゴリーを表示 */}
-                          <p  className={styles.storecategory}>
-                            {reataurants_categories
-                              .filter(rc => rc.restaurant_id === r.id)
-                              .map(rc => categories.find(c => c.id === rc.category_id) ?.name ?? "不明")
-                              .join("/")
-                            }
-                          </p>
-                        </div>
-                      )}
-                      
-                      <span
-                        className={`material-symbols-outlined ${styles.displaychange}`}
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          setOpenId(openId === r.id ? null : r.id);
-                        }}
-                      >
-                      more_vert
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className={styles.nothing}>該当する店舗はありません</p>
-            );
-          })()}
+            {selectedKind === "非公開" && (
+              <ShopCards
+                shops={shops.filter((r) => !r.isPublished)}
+                categories={categories}
+                restaurants_categories={restaurantsCategories}
+                router={router}
+                openId={openId}
+                setOpenId={setOpenId}
+                setPrivateModal={setPrivateModal}
+              />
+            )}
+            </>
+          )}
         </div>
 
         {/* カテゴリー編集モーダル */}
