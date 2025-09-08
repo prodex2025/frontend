@@ -1,6 +1,6 @@
 'use client';
 
-import BusinessHourRow from '@/components/Molecules/BusinessHourRow';
+import BusinessHourRow from '@/components/molecules/BusinessHourRow';
 
 // cssのインポート
 import styles from '@/styles/BusinesRegister.module.css';
