@@ -335,7 +335,7 @@ export const dishes:Dishes[] = [
     price:480,
     description:'ステーキ',
     image_url:'@/image/stake.png',
-    video_url:'@/video/menu.mp4',
+    video_url:'model6',
   },
   {
     id:4,

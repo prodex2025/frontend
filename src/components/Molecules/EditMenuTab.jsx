@@ -6,6 +6,7 @@ import styles from '@/styles/EditMenuTab.module.css';
 // コンポーネント
 import EditStoreModal from '@/components/molecules/EditStoreModal';
 import EditMenuRegistartionForm from '@/components/molecules/EditMenuRegistrationForm';
+import EditMenuForm from '@/components/molecules/EditMenuForm';
 
 export default function EditMenuTab({ restaurant }) {
   if (!restaurant) return null;
@@ -16,6 +17,7 @@ export default function EditMenuTab({ restaurant }) {
 
   // モーダル管理
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMenuModalOpen, setIsEditMenuModalOpen] = useState(false);
   const [editingDish, setEditingDish] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -131,9 +133,23 @@ export default function EditMenuTab({ restaurant }) {
         </div>
       )}
 
-      {/* モーダル */}
-      <EditStoreModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      {/* 追加モーダル */}
+      <EditStoreModal open={isEditMenuModalOpen} onClose={() => setIsEditMenuModalOpen(false)}>
         <EditMenuRegistartionForm
+          restaurantId={restaurant.id}
+          dish={editingDish}
+          isAdding={isAdding}
+          onSuccess={async()=>{
+            await fetchDishes();
+            setIsEditMenuModalOpen(false);
+          }}
+          onCancel = {() => setIsEditMenuModalOpen(false)}
+        />
+      </EditStoreModal>
+
+      {/* 編集モーダル */}
+      <EditStoreModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <EditMenuForm
           restaurantId={restaurant.id}
           dish={editingDish}
           isAdding={isAdding}
