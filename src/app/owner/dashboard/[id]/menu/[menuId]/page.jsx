@@ -3,8 +3,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import styles from "@/styles/ThreeViewer.module.css";
-import Link from "next/link";
+
+import BackButton from "@/components/atoms/BackButton"
 import ThreeModelViewer from "@/components/atoms/ThreeModelViewer";
+
 
 // 数値化のユーティリティ
 const toNumOrNull = (v) => {
@@ -208,13 +210,15 @@ export default function Page() {
   return (
     <div className={styles.wrap}>
       {/* 戻る */}
-      <div className={styles.backButton}>
-        <Link href={`/owner/dashboard/${restaurantId}/`}>
-          <span className={`material-symbols-outlined ${styles.backIcon}`}>
-            arrow_back
-          </span>
-        </Link>
-      </div>
+      <BackButton
+          className={styles.backButton}
+          role="owner"
+          restaurantId={restaurantId}
+          fallbackMap={{
+          owner: `/owner/dashboard/${restaurantId}`, // 例：メニュー一覧へ
+          user:  `/store/list/details/${restaurantId}`
+          }}
+      />
 
       {/* 見出し（テキスト長だけの下線はCSSで .title3d） */}
       <div className={styles.titles}>

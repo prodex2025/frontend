@@ -16,13 +16,14 @@
   left: 24px;
   border: 1.5px solid white;
   border-radius: 50%;
-  padding: 6px 6px 0 6px;
+  padding: 6px;
   cursor: pointer;
   z-index: 1000; /* 必要に応じて他UIの上に */
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
+  color: white;
 }
 
 /* 戻るボタン */
