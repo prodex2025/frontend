@@ -5,7 +5,7 @@
 import styles from '@/styles/approvals.module.css';
 
 // コンポーネント読み込み
-import ApprovalsButton from '@/components/atoms/ApprovalsButton';
+import ApprovalsButton from '@/components/atoms/approvalsButton';
 import ApprovalsInput from '@/components/atoms/ApprovalsInput';
 
 import { useRouter } from "next/navigation";
@@ -53,7 +53,7 @@ export default function LoginPage() {
       </form>
 
       <p>アカウントが未登録ですか？</p>
-      <a href={"/register/admin"}>アカウント作成</a>
+      <a href={"/register/owner"}>アカウント作成</a>
     </div>
   );
 }
