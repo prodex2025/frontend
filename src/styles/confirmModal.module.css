@@ -1,0 +1,85 @@
+/* confirmModal.module.css */
+/* 登録確認モーダル用 */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modalContent {
+    position: relative; 
+    background-color: white;
+    padding: 40px;
+    border-radius: 16px;
+    width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #666;
+}
+
+.field p {
+  color: #666;
+  margin: 0;
+  font-size: 26px;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.backButton {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.backButton span {
+    font-size: 40px;
+}
+
+.field label,
+.field p {
+  padding-left: 0;
+  margin-left: 50px; /* お好みで調整 */
+}
+
+.okButton {
+  padding: 12px 45px;  /* 上下12px、左右40px */
+  font-size: 18px;     /* 文字も少し大きく */
+}
