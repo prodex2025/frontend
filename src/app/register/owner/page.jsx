@@ -1,92 +1,142 @@
-//　経営者側の新規登録画面
-// CSSファイルの読み込み
-'use client';
+// 経営者側の新規登録
+"use client";
 
-import { useRouter } from 'next/navigation'; 
-import React , { useState }from 'react';
-import styles from '@/styles/approvals.module.css';
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import styles from "@/styles/approvals.module.css";
 
-// コンポーネント読み込み
-import ApprovalsButton from '@/components/atoms/approvalsButton';
-import ApprovalsInput from '@/components/atoms/ApprovalsInput';
-import ConfirmModal from '@/components/atoms/ConfirmModal'; //確認モーダル用
+import ApprovalsButton from "@/components/atoms/ApprovalsButton";
+import ApprovalsInput from "@/components/atoms/ApprovalsInput";
+import ConfirmModal from "@/components/atoms/ConfirmModal";
 
-export default function LoginPage() {
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+
+export default function OwnerRegisterPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  // 入力状態を管理
-  const [name, setName] = useState('');
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
+  // 入力状態
+  const [name, setName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
-  
-  // 戻るボタンのクリック時に前のページへ戻る関数
+
   const handleBack = () => {
-    router.push('/login/owner'); // 1つ前のページに戻る
-    console.log("戻るボタン");
+    router.push("/login/owner");
   };
-  
-  // 登録ボタンを押したらモーダルを表示
+
+  // まずモーダルを開く
   const handleSubmit = (e) => {
     e.preventDefault();
     setShowModal(true);
   };
-  
-  // モーダルで「OK」押したときの登録処理
-  const handleConfirm = () => {
-    setShowModal(false);
-    console.log('登録ボタン', { userId, password });
-    // API呼び出しなど行う
-  
-    // ▼ 登録完了したらログイン画面へ戻る
-    router.push('/login/owner');
-  };
 
- 
-  // 登録ボタン
-  // function rigister(){
-  //   console.log("登録ボタン");
-  // }
+  // モーダルOK時の実処理
+  const handleConfirm = async () => {
+    if (loading) return;
+
+    if (!userId || !password || !name) {
+      alert("名前 と ID と パスワードを入力してください。");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/owner`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ loginId: userId, password, userName: name }),
+      });
+
+      if (!res.ok) {
+        const ct = res.headers.get("content-type") || "";
+        const msg = ct.includes("application/json")
+          ? (await res.json())?.message ?? "登録に失敗しました"
+          : await res.text();
+
+        if (
+          String(msg).includes("既に存在") ||
+          String(msg).includes("すでに")
+        ) {
+          alert("※このIDはすでに使用されています");
+        } else {
+          alert(String(msg));
+          console.error("register error:", msg);
+        }
+        return;
+      }
+
+      alert("登録が完了しました。");
+      router.push("/login/owner");
+    } catch (err) {
+      console.error("登録エラー:", err);
+      alert("登録に失敗しました。");
+    } finally {
+      setLoading(false);
+      setShowModal(false);
+    }
+  };
 
   return (
     <>
-    <div className={styles.div}>
-      <button className={styles.backbutton} onClick={handleBack}>←</button>
-      <form className={styles.loginForm} onSubmit={handleSubmit}>
-        <h2 className={styles.h2}>経営者新規アカウント登録</h2>
-        
-        {/* ユーザー氏名 */}
-        <ApprovalsInput type="text" name='name' id='name' text="ユーザー氏名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}/>
+      <div className={styles.div}>
+        <button className={styles.backbutton} onClick={handleBack}>
+          ←
+        </button>
 
-        {/* ユーザーID */}
-        <ApprovalsInput type="text" name='userId' id='userId' text="ID(半角英数字のみ)"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}/>
+        <form className={styles.loginForm} onSubmit={handleSubmit}>
+          <h2 className={styles.h2}>経営者新規アカウント登録</h2>
 
-        {/* password */}
-        <ApprovalsInput type="password" name='password' id='password' text="パスワード(半角英数字のみ)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}/>
+          <ApprovalsInput
+            type="text"
+            name="name"
+            id="name"
+            text="ユーザー氏名"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
 
-        {/* 登録ボタン */}
-        <ApprovalsButton type="submit" text="登録"/>
-      </form>
-    </div>
+          <ApprovalsInput
+            type="text"
+            name="userId"
+            id="userId"
+            text="ID(半角英数字のみ)"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            required
+          />
 
-    {/* モーダルはここ。画面全体の上に表示されるように親divの外 */}
-    {showModal && (
-      <ConfirmModal
-        fields={[
-          { label: 'ユーザ氏名', value: name },
-          { label: 'ID(半角英数字のみ)', value: userId },
-          { label: 'パスワード(半角英数字のみ)', value: password },
-        ]}
-        onConfirm={handleConfirm}
-        onCancel={() => setShowModal(false)}
-      />
-    )}
+          <ApprovalsInput
+            type="password"
+            name="password"
+            id="password"
+            text="パスワード(半角英数字のみ)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <ApprovalsButton
+            type="submit"
+            text={loading ? "登録中…" : "登録"}
+            disabled={loading}
+          />
+        </form>
+      </div>
+
+      {showModal && (
+        <ConfirmModal
+          fields={[
+            { label: "ユーザ氏名", value: name },
+            { label: "ID(半角英数字のみ)", value: userId },
+            { label: "パスワード(半角英数字のみ)", value: password },
+          ]}
+          onConfirm={handleConfirm}
+          onCancel={() => setShowModal(false)}
+        />
+      )}
     </>
   );
 }
