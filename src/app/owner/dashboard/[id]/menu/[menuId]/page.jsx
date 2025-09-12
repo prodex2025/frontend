@@ -24,12 +24,12 @@ const normalizeBase = (folder) => {
 
 // アレルギーアイコン（/public/image/allergy/{id}.svg → .png の順でフォールバック）
 function AllergyBadge({ id, name }) {
-  const [src, setSrc] = useState(`/image/allergy/${id}.svg`);
+  const [src, setSrc] = useState(`/image/allergy/${name}.svg`);
   const [failed, setFailed] = useState(0);
 
   const onError = () => {
     if (failed === 0) {
-      setSrc(`/image/allergy/${id}.png`); // svgが無い時はpngへ
+      setSrc(`/image/allergy/${name}.png`); // svgが無い時はpngへ
       setFailed(1);
     } else {
       setFailed(2); // それでも失敗したら絵文字にフォールバック
@@ -216,7 +216,7 @@ export default function Page() {
           restaurantId={restaurantId}
           fallbackMap={{
           owner: `/owner/dashboard/${restaurantId}`, // 例：メニュー一覧へ
-          user:  `/store/list/details/${restaurantId}`
+          store:  `/store/list/details/${restaurantId}`
           }}
       />
 

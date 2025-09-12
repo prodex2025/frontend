@@ -29,7 +29,11 @@ export default function StoreMenuTab({ restaurant }) {
         <div className={styles.menuGrid}>
           {restaurantDishes.map((dish) => (
             <div key={dish.id} className={styles.menuCard}>
-              <Link href={`/owner/dashboard/${dish.restaurant_id}/menu/${dish.id}`}>
+              <Link href={{
+                pathname: `/owner/dashboard/${dish.restaurant_id}/menu/${dish.id}`,
+                query: { from: `/store/list/details/${dish.restaurant_id}` }, // ← ここだけ追加
+              }}
+              >
                 <img src={dish.image_url.replace('@', '')} alt={dish.name} className={styles.menuImage} />
                 <div className={styles.menuInfo}>
                   <div className={styles.dishName}>{dish.name}</div>
