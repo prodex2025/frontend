@@ -40,55 +40,51 @@
 .container {
   background: #fdfdfd;
   font-family: "Helvetica Neue", sans-serif;
-  padding: 20px;     /* 周囲に余白を付ける */
-  margin: 0;    /* 外側余白なし */
+  padding: 20px; /* 周囲に余白を付ける */
+  margin: 0; /* 外側余白なし */
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,      /* 塗りつぶしなし */
-    'wght' 400,    /* ウェイト（太さ） */
-    'GRAD' 0,       /* グラデーションなし */
-    'opsz' 24;      /* 最適化サイズ */
+  font-variation-settings: "FILL" 0, /* 塗りつぶしなし */ "wght" 400,
+    /* ウェイト（太さ） */ "GRAD" 0, /* グラデーションなし */ "opsz" 24; /* 最適化サイズ */
 }
 
 /* 検索バー */
 .searchBar {
-  display: flex;      /* フレックスボックスで中央寄せ */
-  justify-content: center;      /* 横方向中央揃え */
-  margin-bottom: 20px;            /* 下に余白 */
-  margin-top: 20px;            /* 下に余白 */
+  display: flex; /* フレックスボックスで中央寄せ */
+  justify-content: center; /* 横方向中央揃え */
+  margin-bottom: 20px; /* 下に余白 */
+  margin-top: 20px; /* 下に余白 */
 }
 
 /* 検索バーの入力欄と虫眼鏡アイコンを包んでいるコンテナ要素 */
 .searchWrapper {
-  display: flex;         /* 入力とアイコンを横並びに */
-  align-items: center;    /* 縦位置を中央揃え */
-  width: 768px;      /* 幅を固定 */
+  display: flex; /* 入力とアイコンを横並びに */
+  align-items: center; /* 縦位置を中央揃え */
+  width: 768px; /* 幅を固定 */
   height: 40px;
-  padding: 0 20px;            /* 左右に内側余白 */
-  border-radius: 42px;       /* 丸みをつける */
-  background: #ffffff;   /* 背景白 */
-  box-shadow:
-    inset 5px 5px 10px #a6b4c8,       /* 内側の影（左下） */
-    inset -5px -5px 15px #ffffff;     /* 内側の影（右上） */
-  border: 1px solid #ccc;     /* 枠線 */
+  padding: 0 20px; /* 左右に内側余白 */
+  border-radius: 42px; /* 丸みをつける */
+  background: #ffffff; /* 背景白 */
+  box-shadow: inset 5px 5px 10px #a6b4c8,
+    /* 内側の影（左下） */ inset -5px -5px 15px #ffffff; /* 内側の影（右上） */
+  border: 1px solid #ccc; /* 枠線 */
 }
 
 /* 虫眼鏡アイコン */
 .searchIcon {
   font-size: 24px;
   color: #999;
-  margin-right: 12px;      /* 入力との間に余白 */
+  margin-right: 12px; /* 入力との間に余白 */
 }
 
 /* 検索入力欄の「テキスト部分だけ」へのスタイル */
 .searchWrapper input {
-  flex: 1;       /* アイコンの横で、残りの幅ぜんぶ使う */
-  border: none;  /* 枠線を消す（親に枠をつけてるため） */
-  outline: none;   /* フォーカス時の青い縁を消す（デフォルト無効） */
+  flex: 1; /* アイコンの横で、残りの幅ぜんぶ使う */
+  border: none; /* 枠線を消す（親に枠をつけてるため） */
+  outline: none; /* フォーカス時の青い縁を消す（デフォルト無効） */
   font-size: 16px;
-  background: transparent;     /* 背景を透明に（親が背景を持ってるので） */
+  background: transparent; /* 背景を透明に（親が背景を持ってるので） */
 }
 
 /* 検索欄のプレースホルダー（"店舗検索"の文字） */
@@ -125,8 +121,8 @@
 /* カテゴリーボタンの横スクロール領域 */
 .filterScroll {
   border-bottom: 1px solid #ccc;
-  overflow-x: auto;       /*横にスクロールできるように*/
-  white-space: nowrap;    /*ボタンを折り返さず一列に並べる*/
+  overflow-x: auto; /*横にスクロールできるように*/
+  white-space: nowrap; /*ボタンを折り返さず一列に並べる*/
   padding-bottom: 10px;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -172,19 +168,19 @@
   margin: 0 auto;
 }
 
- /* 1つの店舗を表すカード全体の枠 */
+/* 1つの店舗を表すカード全体の枠 */
 .shopCard {
-  width: clamp(300px, 80vw, 900px);          /* 最小280px、画面幅の80%、最大900px */
-  display: flex;            /*中の「画像」と「情報」を横並びに*/
+  width: clamp(300px, 80vw, 900px); /* 最小280px、画面幅の80%、最大900px */
+  display: flex; /*中の「画像」と「情報」を横並びに*/
   background: white;
-  border-radius: 16px;            /*カード角を丸く*/
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);     /*ふわっとした立体感を出す*/
-  overflow: hidden;                /*内部の画像などが角丸からはみ出さないように*/
-  transition: transform 0.2s;     /*ホバー時のアニメーションを滑らかに*/
+  border-radius: 16px; /*カード角を丸く*/
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /*ふわっとした立体感を出す*/
+  overflow: hidden; /*内部の画像などが角丸からはみ出さないように*/
+  transition: transform 0.2s; /*ホバー時のアニメーションを滑らかに*/
   height: 100%;
-  padding: 20px;              /*内側の余白*/
-  gap: 20px;                /*画像とテキストの間にスペース*/
-  margin: 0 auto;          /*中央揃え*/
+  padding: 20px; /*内側の余白*/
+  gap: 20px; /*画像とテキストの間にスペース*/
+  margin: 0 auto; /*中央揃え*/
   margin-top: 10px;
 }
 
@@ -194,6 +190,7 @@
 
 .shopImage {
   width: clamp(150px, 40vw, 400px);
+  aspect-ratio: 2 / 1;
   height: auto;
   object-fit: cover;
 }
@@ -209,16 +206,15 @@
 
 /* ショップ情報の背景パネル */
 .shopInfoPanel {
-  background-color: #EEF1F5;
-  border-radius: 12px;    /* 少し丸みを持たせる */
-  padding: 24px 28px;     /* 内側余白をしっかり取る */
+  background-color: #eef1f5;
+  border-radius: 12px; /* 少し丸みを持たせる */
+  padding: 24px 28px; /* 内側余白をしっかり取る */
   display: flex;
   flex-direction: column;
-  gap: 6px;         /* 情報同士の隙間 */
-  box-shadow:
-    inset 5px 5px 10px #A6B4C8,     /* 内側の影（左上） */
-    inset -5px -5px 15px #ffffff;  /* 内側の影（右下） */
-  height: 250px;  /* 背景パネルだけ縦に伸ばす */
+  gap: 6px; /* 情報同士の隙間 */
+  box-shadow: inset 5px 5px 10px #a6b4c8,
+    /* 内側の影（左上） */ inset -5px -5px 15px #ffffff; /* 内側の影（右下） */
+  height: 250px; /* 背景パネルだけ縦に伸ばす */
 }
 
 /* 店舗名（見出し）用スタイル */

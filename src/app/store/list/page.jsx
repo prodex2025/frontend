@@ -1,92 +1,132 @@
-//店舗一覧画面
+// 店舗一覧画面
+"use client";
 
-'use client';            // Next.js の App Router でクライアントコンポーネントとして扱う宣言
+import styles from "@/styles/storeList.module.css";
+import "@/app/globals.css";
 
-import styles from '@/styles/storeList.module.css';
+import CategoryTag from "@/components/atoms/CategoryTag.jsx";
+import ShopCard from "@/components/atoms/ShopCard.jsx";
+import Pagination from "@/components/atoms/Pagination.jsx";
 
-import '@/app/globals.css';       // グローバルCSS（共通スタイル）
-
-//コンポーネントのインポート
-import CategoryTag from '@/components/atoms/CategoryTag.jsx';       // カテゴリー用の再利用コンポーネント
-import ShopCard from '@/components/atoms/ShopCard.jsx';             //ショップカード用部品
-import Pagination from '@/components/atoms/Pagination.jsx';         //ページネーション用コンポーネント
-
-// 仮のデータセットをインポート（店舗・カテゴリ・関連テーブル）
-//import { restaurants, categories, reataurants_categories } from '@/data/mockData';
-
-import { useState, useEffect, useRef } from 'react';    // React の状態管理と副作用フック
-import { useSearchParams, useRouter } from 'next/navigation';   //ページ移動用
-import clsx from 'clsx';     // 条件付きで className を結合するユーティリティ（今のところ未使用）
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { apiFetch, checkTokenExpired } from "@/hooks/useApiFetch";
 
 export default function HomePage() {
   const scrollAreaRef = useRef(null);
+  const filterScrollRef = useRef(null);
 
-  // 現在選択されているカテゴリー名の集合（Setで重複なく管理）
-  const [selected, setSelected] = useState(new Set());
+  // カテゴリは ID で管理
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
-  const searchParams = useSearchParams();  // URLのクエリを取得
+  const searchParams = useSearchParams();
   const router = useRouter();
 
-  // ページ番号管理（URLのpageクエリを初期値に使う。なければ1）
-  const initialPage = parseInt(searchParams.get('page')) || 1;
+  const initialPage = parseInt(searchParams.get("page")) || 1;
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  // 取得した店舗データとカテゴリデータを分けて管理
   const [shops, setShops] = useState([]);
   const [categories, setCategories] = useState([]);
-  
-  //店舗検索用
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
 
-  //ページネーション用（１ページに１０件ずつ）
-  const itemsPerPage = 10;                            // 1ページに表示する店舗数
+  const [serverTotalPages, setServerTotalPages] = useState(1);
+  const itemsPerPage = 10;
 
-   // --- 初回：カテゴリ一覧のみ取得 ---
+  // --- 初回：カテゴリ & 店舗(1ページ目) ---
   useEffect(() => {
-    fetch('/api/store') // クエリなしで全カテゴリを取得
-      .then(res => res.json())
-      .then(data => {
-        setCategories(data.categories);
-      })
-      .catch(err => console.error('カテゴリ取得エラー:', err));
+    (async () => {
+      try {
+        const [catRes, shopRes] = await Promise.all([
+          apiFetch("/api/categories"),
+          apiFetch(`/api/restaurants?page=0&size=${itemsPerPage}`),
+        ]);
+
+        if (checkTokenExpired(catRes, router) || checkTokenExpired(shopRes, router)) return;
+
+        // カテゴリ
+        if (catRes.response.ok) {
+          const catJson = await catRes.response.json();
+          setCategories(Array.isArray(catJson) ? catJson : (catJson.categories ?? []));
+        } else {
+          console.error("カテゴリ取得エラー:", await catRes.response.text());
+        }
+
+        // 店舗
+        if (shopRes.response.ok) {
+          const j = await shopRes.response.json();
+          const items = (j.content ?? []).map((r) => ({
+            id: r.restaurantId,
+            name: r.restaurantName,
+            address: r.restaurantAddress,
+            postCode: r.restaurantPostCode,
+            categories: (r.categoryDtoList ?? []).map((c) => c.name),
+            imageUrl: r.imageUrl ?? null,
+          }));
+          setShops(items);
+          setServerTotalPages(j.totalPages ?? 1);
+        } else {
+          console.error("店舗取得エラー:", await shopRes.response.text());
+        }
+      } catch (err) {
+        console.error("初期データ取得エラー:", err);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- フィルタ変更時：店舗データ取得 ---
+  // --- フィルタ / 検索 / ページ変更時：店舗データ取得 ---
   useEffect(() => {
-    const categoriesQuery = Array.from(selected).join(',');
-    const query = new URLSearchParams();
-    if (searchText) query.set('keyword', searchText);
-    if (categoriesQuery) query.set('categories', categoriesQuery);
+    (async () => {
+      try {
+        const query = new URLSearchParams();
 
-    fetch(`/api/store?${query.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        setShops(data.stores);
-      })
-      .catch(err => console.error('店舗データ取得エラー:', err));
-  }, [selected, searchText]);
+        // categoryIds を List として付与（…?categoryIds=id1&categoryIds=id2）
+        if (selectedIds.size > 0) {
+          Array.from(selectedIds).forEach((id) => query.append("categoryIds", id));
+        }
+        if (searchText) query.set("keyword", searchText);
+        query.set("page", String(currentPage - 1)); // サーバは0始まり
+        query.set("size", String(itemsPerPage));
+
+        const result = await apiFetch(`/api/restaurants?${query.toString()}`);
+        if (checkTokenExpired(result, router)) return;
+
+        if (!result.response.ok) {
+          console.error("店舗データ取得エラー:", await result.response.text());
+          return;
+        }
+        const j = await result.response.json();
+        const items = (j.content ?? []).map((r) => ({
+          id: r.id,
+          name: r.name,
+          address: r.address,
+          postCode: r.postCode,
+          categories: (r.categoryDtoList ?? []).map((c) => c.name),
+          imageUrl: r.imageUrl ?? null,
+        }));
+        setShops(items);
+        setServerTotalPages(j.totalPages ?? 1);
+      } catch (err) {
+        console.error("店舗データ取得エラー:", err);
+      }
+    })();
+  }, [selectedIds, searchText, currentPage, router]);
 
   // URLのpageが変わったらcurrentPageを更新
   useEffect(() => {
-    const pageFromUrl = parseInt(searchParams.get('page')) || 1;
-    if (pageFromUrl !== currentPage) {
-      setCurrentPage(pageFromUrl);
-    }
-  }, [searchParams]);
+    const pageFromUrl = parseInt(searchParams.get("page")) || 1;
+    if (pageFromUrl !== currentPage) setCurrentPage(pageFromUrl);
+  }, [searchParams, currentPage]);
 
-  // --- ページ変更でスクロール位置をトップに ---
+  // ページ移動でスクロールトップへ
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollAreaRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentPage]);
 
-  // --- 店舗フィルター後のページング処理 ---
-  const totalPages = Math.ceil(shops.length / itemsPerPage);
-  const paginatedShops = shops.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedShops = shops; // サーバページング
+  const totalPages = serverTotalPages;
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -95,90 +135,93 @@ export default function HomePage() {
     }
   };
 
-  // --- カテゴリー選択トグル ---
-  const toggleCategory = (name) => {
-    const updated = new Set(selected);
-    updated.has(name) ? updated.delete(name) : updated.add(name);
-    setSelected(updated);
-
+  // カテゴリー選択トグル（IDで管理）
+  const toggleCategory = (id) => {
+    const updated = new Set(selectedIds);
+    updated.has(id) ? updated.delete(id) : updated.add(id);
+    setSelectedIds(updated);
     setCurrentPage(1);
     router.push(`/store/list?page=1`, { scroll: false });
   };
 
-  // --- 検索テキスト入力時 ---
   const onSearchChange = (e) => {
     setSearchText(e.target.value);
     setCurrentPage(1);
-    router.push(`/store/list?page=1`, { scroll: false });
+    router.push("/store/list?page=1", { scroll: false });
   };
-
-  // フィルターエリアの横スクロール制御
-  const filterScrollRef = useRef(null);
 
   const scrollCategoryLeft = () => {
     if (filterScrollRef.current) {
-        filterScrollRef.current.scrollBy({ left: -550, behavior: 'smooth' });
+      filterScrollRef.current.scrollBy({ left: -550, behavior: "smooth" });
     }
   };
-
   const scrollCategoryRight = () => {
     if (filterScrollRef.current) {
-      filterScrollRef.current.scrollBy({ left: 550, behavior: 'smooth' });
+      filterScrollRef.current.scrollBy({ left: 550, behavior: "smooth" });
     }
   };
-
 
   return (
     <div className={styles.wrapper}>
       {/* 検索バー + カテゴリー（固定ヘッダー） */}
       <div className={styles.fixedHeader}>
-        {/* 検索バー*/}
+        {/* 検索バー */}
         <div className={styles.searchBar}>
           <div className={styles.searchWrapper}>
             <span className="material-symbols-outlined">search</span>
-            <input type="text" placeholder="店名で検索" value={searchText} onChange={(e) => setSearchText(e.target.value)}/>
+            <input
+              type="text"
+              placeholder="店名で検索"
+              value={searchText}
+              onChange={onSearchChange}
+            />
           </div>
         </div>
 
-       {/* カテゴリータグ + 横スクロール矢印 */}
+        {/* カテゴリータグ + 横スクロール矢印 */}
         <div className={styles.filterScrollWrapper}>
-          {/* ← 左矢印（アイコンを左右反転） */}
-          <span className={`material-symbols-outlined ${styles.scrollIcon} ${styles.left}`} onClick={scrollCategoryLeft}>
+          <span
+            className={`material-symbols-outlined ${styles.scrollIcon} ${styles.left}`}
+            onClick={scrollCategoryLeft}
+          >
             expand_circle_right
           </span>
 
-          {/* 横スクロール領域 */}
           <div className={styles.filterScroll} ref={filterScrollRef}>
             <div className={styles.filterButtons}>
-              {/* 全カテゴリをタグとして表示 */}
               {categories.map((category) => (
                 <CategoryTag
-                  key={category.id}    // React のキー
-                  label={category.name}    // 表示名
-                  selected={selected.has(category.name)}    // 選択状態を判定
-                  onClick={() => toggleCategory(category.name)}    // クリック時の処理
-                  className={styles.filterButton}                  // スタイル指定
+                  key={category.id}
+                  label={category.name}
+                  selected={selectedIds.has(category.id)}
+                  onClick={() => toggleCategory(category.id)}
+                  className={styles.filterButton}
                 />
               ))}
             </div>
           </div>
 
-          {/* → 右矢印 */}
-          <span className={`material-symbols-outlined ${styles.scrollIcon}`} onClick={scrollCategoryRight}>
+          <span
+            className={`material-symbols-outlined ${styles.scrollIcon}`}
+            onClick={scrollCategoryRight}
+          >
             expand_circle_right
           </span>
         </div>
       </div>
 
-      {/* 店舗一覧（スクロール可能） */}
+      {/* 店舗一覧 */}
       <div className={styles.scrollArea} ref={scrollAreaRef}>
         <div className={styles.shopList}>
-          {/* フィルターされた店舗のみ表示 */}
           {paginatedShops.length === 0 ? (
             <div className={styles.noResult}>該当する店舗は見つかりませんでした。</div>
           ) : (
-            paginatedShops.map((shop) => (
-              <ShopCard key={shop.id} shop={shop} url={`/store/list/details/${shop.id}?page=${currentPage}`}/>
+            paginatedShops.map((shop, index) => (
+              <ShopCard
+                key={`${shop.id}-${index}`}
+                shop={shop}
+                url={`/store/list/details/${shop.id}?page=${currentPage}`}
+              />
             ))
           )}
         </div>
@@ -190,7 +233,6 @@ export default function HomePage() {
         totalPages={totalPages}
         onPageChange={goToPage}
       />
-
     </div>
   );
 }
