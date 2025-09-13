@@ -55,10 +55,10 @@ export default function HomePage() {
         if (shopRes.response.ok) {
           const j = await shopRes.response.json();
           const items = (j.content ?? []).map((r) => ({
-            id: r.restaurantId,
-            name: r.restaurantName,
-            address: r.restaurantAddress,
-            postCode: r.restaurantPostCode,
+            id: r.id,
+            name: r.name,
+            address: r.address,
+            postCode: r.postCode,
             categories: (r.categoryDtoList ?? []).map((c) => c.name),
             imageUrl: r.imageUrl ?? null,
           }));
