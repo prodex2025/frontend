@@ -13,12 +13,19 @@
 /* formのスタイル */
 .Form{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.formContent{
+  display: flex;
+  flex-direction: row !important;
   flex-basis: 50%;
   gap: 20px;
 }
 
-.Form div{
+.leftContent{
   display: flex;
   flex-direction: column;
   flex-basis: 50%;
@@ -160,4 +167,8 @@
   align-items: center;
   justify-content: center;
   z-index: 10; /* ← video より前に配置 */
+}
+
+.registerBtn{
+  width: 35vw;
 }
