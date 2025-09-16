@@ -83,8 +83,25 @@ export default function EditMenuTab({ restaurant }) {
   return (
     <div className={styles.menuContainer}>
       {restaurantDishes.length === 0 ? (
-        <div className={styles.empty}>メニュー情報がありません。</div>
-      ) : (
+        <div className={styles.empty}>メニュー情報がありません。
+          <div className={styles.menuGrid}>
+            {/* メニュー追加カード */}
+            <div
+              className={`${styles.menuCard} ${styles.addMenuCard}`}
+              onClick={handleAdd}
+            >
+              <div className={styles.addMenuContent}>
+                <p className={styles.addText}>メニューを追加</p>
+                <span className={`${styles.addIcon} material-symbols-outlined`}>
+                  add_circle
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      ) : 
+      (
         <div className={styles.menuGrid}>
           {/* メニュー追加カード */}
           <div
