@@ -41,7 +41,7 @@ export default function EditMenuTab({ restaurant, onMenusChanged }) {
     setFetchError(null);
     try {
       const result = await apiFetch(
-        `/api/owner/restaurants/${restaurant.id}/menus?page=0&size=10&sort=createdAt,desc`,
+        `/api/owner/restaurants/${restaurant.id}/menus?page=0`,
         { method: "GET", signal: controller.signal }
       );
       if (checkTokenExpired(result, router)) return;
