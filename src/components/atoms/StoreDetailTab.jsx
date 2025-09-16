@@ -35,7 +35,7 @@ function formatPhoneNumber(number) {
 }
 
 export default function StoreDetailTab({ restaurant }) {
-  if (!restaurant) return null;
+ if (!restaurant) return null;
 
   // ← どちらのキーでも拾えるように
   const businessHours =
@@ -44,22 +44,6 @@ export default function StoreDetailTab({ restaurant }) {
   // dayOfWeek をキー化（0..7）
   const weekdayMap = Object.fromEntries(
     (businessHours || []).map((b) => [b.dayOfWeek, b])
-
-  useEffect(() => {
-    console.log("📦 StoreDetailTab に渡ってきた restaurant.storeSchedules:", restaurant?.storeSchedules);
-  }, [restaurant]);
-
-  if (!restaurant) return null;
-    
-  if (!restaurant) return null;
-
-  // 対象店舗の営業時間だけ抽出
-  const businessHours = restaurant.storeSchedules || [];
-
-  // 営業日(曜日番号)リスト
-  const openDays = businessHours.map((b) => b.dayOfWeek);
-  const weekdayMap = Object.fromEntries(
-    businessHours.map((b) => [b.dayOfWeek, b])
   );
 
   const closedLabel =
@@ -71,7 +55,6 @@ export default function StoreDetailTab({ restaurant }) {
           : `${WEEKDAYS[b.dayOfWeek]}曜日`
       )
       .join("、") || "なし";
-
   return (
     <div className={styles.container}>
         {/* 左：画像エリア */}
