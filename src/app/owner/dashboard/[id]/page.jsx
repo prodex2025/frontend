@@ -1,69 +1,187 @@
-//経営者画面の店舗詳細画面
-'use client';
+// 経営者画面の店舗詳細画面
+"use client";
 
-import styles from '@/styles/StoreDetailPage.module.css';
+import styles from "@/styles/StoreDetailPage.module.css";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
-import { useState } from 'react';     //タブ切り替え、状態保存用
-import { useParams, useSearchParams, useRouter  } from 'next/navigation';  //URLパラメータを取得するためのフック
-import { restaurants, reataurants_categories, categories } from '@/data/mockData'; //データインポート
-import Link from 'next/link';
+import CategoryTag from "@/components/atoms/CategoryTag";
+import StoreDetailTab from "@/components/atoms/StoreDetailTab";
+import StoreMenuTab from "@/components/atoms/StoreMenuTab";
+import StoreStatisticsTab from "@/components/atoms/StoreStatisticsTab";
+import EditButton from "@/components/atoms/EditButton";
+import EditStoreModal from "@/components/molecules/EditStoreModal";
+import EditStoreForm from "@/components/molecules/EditStoreForm";
+import EditDetailTab from "@/components/molecules/EditDetailTab";
+import EditMenuTab from "@/components/molecules/EditMenuTab";
 
-import ShopInfo from '@/components/atoms/ShopInfo';        // 店舗情報を表示するためのコンポーネント
-import CategoryTag from '@/components/atoms/CategoryTag'; // カテゴリータグコンポーネント
-import StoreDetailTab from '@/components/atoms/StoreDetailTab';     //詳細タブ用コンポーネント
-import StoreMenuTab from '@/components/atoms/StoreMenuTab'; // メニュータブ用コンポーネント
-import StoreStatisticsTab from '@/components/atoms/StoreStatisticsTab'; // 統計情報用コンポーネント
-import EditButton from '@/components/atoms/EditButton'; // 編集ボタンのコンポーネント
-import EditStoreModal from "@/components/molecules/EditStoreModal"; // 編集の際のモーダルのコンポーネント
-import EditStoreForm from "@/components/molecules/EditStoreForm"; //上の編集のフォームのコンポーネント
-import EditDetailTab from '@/components/molecules/EditDetailTab';
-import EditMenuTab from '@/components/molecules/EditMenuTab';
+import { apiFetch, checkTokenExpired } from "@/hooks/useApiFetch";
 
 export default function StoreDetailPage() {
-
-  //タブ切り替え用
-  const [activeTab, setActiveTab] = useState('detail');
-
-  // 編集モードの状態管理
+  // タブ/編集
+  const [activeTab, setActiveTab] = useState("detail");
   const [isEditing, setIsEditing] = useState(false);
-
-  // 編集モーダルの開閉状態を管理
   const [editModalOpen, setEditModalOpen] = useState(false);
 
-  // URLのパラメータ（/store/list/details/3 → id = "3"）を取得
+  // 取得状態
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  const [menuItems, setMenuItems] = useState([]);
+  const [menuPage, setMenuPage] = useState(1);
+  const [menuTotalPages, setMenuTotalPages] = useState(1);
+  const [menuLoading, setMenuLoading] = useState(false);
+  const [menuError, setMenuError] = useState(null);
+  const [menuLoadedOnce, setMenuLoadedOnce] = useState(false);
+
+  const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();  // クエリを取得
-  const router = useRouter();               // ページ遷移に使う
+  // UUID をそのまま使う（parseIntしない）
+  const restaurantId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  // パラメータのidを数値に変換（文字列で渡ってくるため）
-  const restaurantId = parseInt(params.id, 10);
+  const fetchMenuPage = async (uiPage = 1) => {
+    try {
+      setMenuLoading(true);
+      setMenuError(null);
+      const zeroBased = Math.max(0, uiPage - 1);
 
-  // 該当する店舗情報を mock データから検索
-  const restaurant = restaurants.find(r => r.id === restaurantId);
+      // エンドポイントはバックエンドに合わせて調整
+      const result = await apiFetch(
+        `/api/owner/restaurants/${restaurantId}/menus?page=${zeroBased}`,
+        { method: "GET" }
+      );
+      if (checkTokenExpired(result, router)) return;
+      console.log(result);
+      if (!result.response.ok) {
+        const t = await result.response.text().catch(() => "");
+        throw new Error(`メニュー取得失敗: ${result.response.status} ${t}`);
+      }
 
-  // 店舗が見つからなかった場合のエラー表示
-  if (!restaurant) {
-    return <div>店舗が見つかりませんでした。</div>;
-  }
+      const data = await result.response.json();
 
-  // 中間テーブルから、対象店舗に紐づくカテゴリIDを取り出し、
-  // それに該当するカテゴリ名を取得
-  const relatedCategories = reataurants_categories
-    .filter(rc => rc.restaurant_id === restaurant.id)
-    .map(rc => {
-      const category = categories.find(cat => cat.id === rc.category_id);
-      return category?.name || '';     // 存在しなければ空文字
-    });
+      const formatted = (Array.isArray(data.content) ? data.content : []).map(
+        (d) => ({
+          id: d.id,
+          name: d.name,
+          price: d.price,
+          imageUrl: d.imageUrl || "/default-dish.png",
+        })
+      );
 
+      setMenuItems(formatted);
+      setMenuTotalPages(Math.max(1, data.totalPages ?? 1));
+      setMenuPage(uiPage);
+      setMenuLoadedOnce(true);
+    } catch (e) {
+      console.error(e);
+      setMenuError(e.message ?? "メニュー取得エラー");
+    } finally {
+      setMenuLoading(false);
+    }
+  };
 
-  // クエリから現在のページを取得。なければ1ページ目
-  const currentPage = searchParams.get('page') || '1';
+  useEffect(() => {
+    if (activeTab === "menu" && !menuLoadedOnce && restaurantId) {
+      fetchMenuPage(1);
+    }
+  }, [activeTab, restaurantId, menuLoadedOnce]);
+
+  // 追加：店舗が切り替わったらメニュー状態はリセット
+  useEffect(() => {
+    setMenuItems([]);
+    setMenuPage(1);
+    setMenuTotalPages(1);
+    setMenuLoading(false);
+    setMenuError(null);
+    setMenuLoadedOnce(false);
+  }, [restaurantId]);
+
+  // API から詳細取得
+  useEffect(() => {
+    if (!restaurantId) return;
+    (async () => {
+      setLoading(true);
+      setFetchError(null);
+      try {
+        // 2つのAPIを並列で叩く
+        const [baseRes, profileRes] = await Promise.all([
+          apiFetch(`/api/owner/restaurants/${restaurantId}`, { method: "GET" }),
+          apiFetch(`/api/owner/restaurants/${restaurantId}/profile`, {
+            method: "GET",
+          }),
+        ]);
+
+        // トークン失効チェック
+        if (
+          checkTokenExpired(baseRes, router) ||
+          checkTokenExpired(profileRes, router)
+        )
+          return;
+
+        // ステータスチェック
+        if (!baseRes.response.ok) {
+          const t = await baseRes.response.text().catch(() => "");
+          throw new Error(
+            `restaurants/${restaurantId} 取得失敗: ${baseRes.response.status} ${t}`
+          );
+        }
+        if (!profileRes.response.ok) {
+          const t = await profileRes.response.text().catch(() => "");
+          throw new Error(
+            `restaurants/${restaurantId}/profile 取得失敗: ${profileRes.response.status} ${t}`
+          );
+        }
+
+        const base = await baseRes.response.json();
+        const profile = await profileRes.response.json();
+
+        // 返却例に合わせてマージ
+        const merged = {
+          id: base.id,
+          name: base.name,
+          address: base.address ?? "",
+          postCode: base.postCode ?? "",
+          imageUrl: base.imageUrl || "/default-shop.png",
+          categories: Array.isArray(base.categoryDtoList)
+            ? base.categoryDtoList.map((c) =>
+                typeof c === "string" ? c : c?.name ?? ""
+              )
+            : [],
+
+          // プロフィール側
+          phone: profile.phone ?? "",
+          email: profile.email ?? "",
+          description: profile.description ?? "",
+          interiorImageUrl: profile.interiorImageUrl ?? "",
+          storeSchedules: profile.storeScheduleDtoList ?? [],
+        };
+
+        setRestaurant(merged);
+      } catch (e) {
+        console.error(e);
+        setFetchError(e.message ?? "エラーが発生しました");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [restaurantId, router]);
+
+  // ローディング/エラー
+  if (loading) return <div className={styles.wrapper}>読み込み中...</div>;
+  if (fetchError)
+    return (
+      <div className={styles.wrapper}>取得に失敗しました：{fetchError}</div>
+    );
+  if (!restaurant)
+    return <div className={styles.wrapper}>店舗が見つかりませんでした。</div>;
 
   return (
     <div className={styles.wrapper}>
       {/* 固定ヘッダー部分 */}
       <div className={styles.fixedHeaderOwner}>
-        {/* 戻るボタン */}
+        {/* 戻る */}
         <div className={styles.backButton}>
           <Link href={`/owner/stores/`}>
             <span className={`material-symbols-outlined ${styles.backIcon}`}>
@@ -71,88 +189,129 @@ export default function StoreDetailPage() {
             </span>
           </Link>
         </div>
-        {/* 真ん中のコンテンツ */}
+
+        {/* 中央コンテンツ */}
         <div className={styles.centerContent}>
-          {/* タイトル */}
           <h1 className={styles.title}>{restaurant.name}</h1>
-          {/* 住所 */}
           <p className={styles.address}>
             <a
-              href={`https://www.google.com/maps/search/?q=${restaurant.address}`}
-            target="_blank"
+              href={`https://www.google.com/maps/search/?q=${encodeURIComponent(
+                restaurant.address
+              )}`}
+              target="_blank"
               rel="noopener noreferrer"
             >
               {restaurant.address}
             </a>
           </p>
-          {/* カテゴリ― */}
-        <div className={styles.categoryContainer}>
-          {relatedCategories.map((category, index) => (
-            <CategoryTag key={index} label={category} selected={true} />
-          ))}
+
+          {/* カテゴリ */}
+          <div className={styles.categoryContainer}>
+            {(restaurant.categories ?? []).length > 0 ? (
+              restaurant.categories.map((category, i) => (
+                <CategoryTag key={i} label={category} selected={true} />
+              ))
+            ) : (
+              <span className={styles.noCategory}>カテゴリなし</span>
+            )}
+          </div>
+        </div>
+
+        {/* 編集ボタン */}
+        <div>
+          <EditButton
+            onClick={() => setEditModalOpen(true)}
+            className={styles.editBtn}
+          />
         </div>
       </div>
-      {/* 編集ボタン */}
-      <div>
-        <EditButton onClick={() => setEditModalOpen(true)} className={styles.editBtn}/>
-      </div>
-    </div>
-    <div className={styles.divider} /> {/* 区切り線 */}
 
-    {/* タブの切り替えUI */}
+      <div className={styles.divider} />
+
+      {/* タブ切替 */}
       <div className={styles.tabContainer}>
         <button
-          className={`${styles.tabButton} ${activeTab === 'detail' ? styles.active : ''}`}
-          onClick={() => setActiveTab('detail')}
+          className={`${styles.tabButton} ${
+            activeTab === "detail" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("detail")}
           disabled={isEditing}
         >
           店舗詳細
         </button>
         <button
-          className={`${styles.tabButton} ${activeTab === 'menu' ? styles.active : ''}`}
-          onClick={() => setActiveTab('menu')}
+          className={`${styles.tabButton} ${
+            activeTab === "menu" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("menu")}
           disabled={isEditing}
         >
           メニュー
         </button>
         <button
-          className={`${styles.tabButton} ${activeTab === 'statistics' ? styles.active : ''}`}
-          onClick={() => setActiveTab('statistics')}
+          className={`${styles.tabButton} ${
+            activeTab === "statistics" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("statistics")}
           disabled={isEditing}
         >
           統計情報
         </button>
-        {activeTab !== 'statistics' && (
-        <div className={styles.editBtnTab}>
+
+        {activeTab !== "statistics" && (
+          <div className={styles.editBtnTab}>
             <EditButton
               onClick={() => setIsEditing(!isEditing)}
-              icon={isEditing ? 'arrow_back' : 'edit_square'}
+              icon={isEditing ? "arrow_back" : "edit_square"}
             />
           </div>
         )}
       </div>
 
-    {/* スクロール領域 */}
-    <div className={styles.scrollArea}>
-      {/* ここに画像・地図・レビューなどが入る想定 */}
-      {!isEditing ? (
-        <>
-          {activeTab === 'detail' && <StoreDetailTab restaurant={restaurant} />}
-          {activeTab === 'menu' && <StoreMenuTab restaurant={restaurant} />}
-          {activeTab === 'statistics' && <StoreStatisticsTab restaurant={restaurant} />}
-        </>
-      ):(
-        <>
-          {activeTab === 'detail' && <EditDetailTab restaurant={restaurant} section="detail" />}
-          {activeTab === 'menu' && <EditMenuTab restaurant={restaurant} section="menu" />}
-        </>
-      )}
+      {/* スクロール領域 */}
+      <div className={styles.scrollArea}>
+        {!isEditing ? (
+          <>
+            {activeTab === "detail" && (
+              <StoreDetailTab restaurant={restaurant} />
+            )}
+            {activeTab === "menu" && (
+              <StoreMenuTab
+                items={menuItems}
+                loading={menuLoading}
+                error={menuError}
+                currentPage={menuPage}
+                totalPages={menuTotalPages}
+                onPageChange={fetchMenuPage} // ← ページ送り時に再フェッチ
+              />
+            )}
+            {activeTab === "statistics" && (
+              <StoreStatisticsTab restaurant={restaurant} />
+            )}
+          </>
+        ) : (
+          <>
+            {activeTab === "detail" && (
+              <EditDetailTab restaurant={restaurant} section="detail" />
+            )}
+            {activeTab === "menu" && (
+              <EditMenuTab
+                restaurant={restaurant}
+                section="menu"
+                onMenusChanged={() => fetchMenuPage(menuPage)}
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 編集モーダル */}
+      <EditStoreModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+      >
+        <EditStoreForm onClose={() => setEditModalOpen(false)} />
+      </EditStoreModal>
     </div>
-    {/* 編集モーダル */}
-    <EditStoreModal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
-      <EditStoreForm onClose={() => setEditModalOpen(false)} />
-    </EditStoreModal>
-  </div>
-    
   );
 }
