@@ -36,19 +36,22 @@ function formatPhoneNumber(number) {
 
 // メインコンポーネント
 export default function StoreDetailTab({ restaurant }) {
+
+  useEffect(() => {
+    console.log("📦 StoreDetailTab に渡ってきた restaurant.storeSchedules:", restaurant?.storeSchedules);
+  }, [restaurant]);
+
+  if (!restaurant) return null;
     
   if (!restaurant) return null;
 
   // 対象店舗の営業時間だけ抽出
-  const businessHours = restaurant.business_hours || [];
+  const businessHours = restaurant.storeSchedules || [];
 
   // 営業日(曜日番号)リスト
-  const openDays = businessHours.map((b) => b.day_of_week);
-  // 定休日 = 曜日番号リストからopenDaysに含まれないもの
-  const closedDays = businessHours.filter((b) => b.is_closed)
-  .map((b) => WEEKDAYS[b.day_of_week]);// 曜日番号をキーに営業時間オブジェクトをマップ化
+  const openDays = businessHours.map((b) => b.dayOfWeek);
   const weekdayMap = Object.fromEntries(
-    businessHours.map((b) => [b.day_of_week, b])
+    businessHours.map((b) => [b.dayOfWeek, b])
   );
 
   return (
@@ -56,7 +59,7 @@ export default function StoreDetailTab({ restaurant }) {
         {/* 左：画像エリア */}
         <div className={styles.imageWrapper}>
             <img
-            src={restaurant.image_detail_url}
+            src={restaurant.interiorImageUrl}
             alt={`${restaurant.name} の画像`}
             className={styles.detailImage}
             />
@@ -76,23 +79,22 @@ export default function StoreDetailTab({ restaurant }) {
                     <span className={styles.colon}>：</span>
                     <span className={styles.value}>
                         {Object.entries(weekdayMap)
-                        .filter(([_, info]) => !info.is_closed)
+                        .filter(([_, info]) => !info.isClosed)
                         .map(([day,info], index) => (
                         <React.Fragment key={day}>
-                            {index > 0 && <br />}
-                            （{WEEKDAYS[Number(day)]}）
-                            {info.is_closed ? (
-                              '定休日'
-                            ):(
-                              <>
-                                {info.is_lunch_closed
-                                  ? ''
-                                  : `ランチ ${info.lunch_start}〜${info.lunch_end} `}
-                                  <br/>
-                                {info.is_dinner_closed
-                                  ? ''
-                                  : `ディナー ${info.dinner_start}〜${info.dinner_end}`}
-                              </>
+                          {index > 0 && <br />}
+                          <div className={styles.timeRow}>
+                            <span className={styles.weekday}>（{WEEKDAYS[Number(day)]}）</span>
+                            {info.lunchStart && (
+                              <span className={styles.lunch}>
+                                ランチ {info.lunchStart.slice(0, 5)}〜{info.lunchEnd.slice(0, 5)}
+                              </span>
+                            )}
+                          </div>
+                          {info.dinnerStart && (
+                            <div className={styles.dinnerIndent}>
+                              ディナー {info.dinnerStart.slice(0, 5)}〜{info.dinnerEnd.slice(0, 5)}
+                            </div>
                           )}
                         </React.Fragment>
                         ))}
@@ -104,11 +106,11 @@ export default function StoreDetailTab({ restaurant }) {
                     <span className={styles.label}>定休日</span>
                     <span className={styles.colon}>：</span>
                     <span className={styles.value}>
-                      {businessHours.some(b => b.is_closed) ? (
+                      {businessHours.some(b => b.isClosed) ? (
                         businessHours
-                          .filter(b => b.is_closed)
+                          .filter(b => b.isClosed)
                           .map(b => {
-                            const name = WEEKDAYS[b.day_of_week];
+                            const name = WEEKDAYS[b.dayOfWeek];
                             return name === '祝日' ? '祝日' : `${name}曜日`;
                           })
                           .join('、')

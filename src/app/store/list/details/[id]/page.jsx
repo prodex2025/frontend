@@ -1,6 +1,8 @@
 //店舗詳細画面
 'use client';
 
+import { apiFetch, checkTokenExpired } from '@/hooks/useApiFetch';
+
 import styles from '@/styles/StoreDetailPage.module.css';
 
 
@@ -22,31 +24,83 @@ export default function StoreDetailPage() {
   const currentPage = searchParams.get('page') || '1';
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   const [activeTab, setActiveTab] = useState('detail');
 
+
    // ✅ 店舗詳細データを API から取得
+ // API から詳細取得
   useEffect(() => {
-    async function fetchRestaurant() {
+    if (!id) return;
+    (async () => {
+      setLoading(true);
+      setFetchError(null);
       try {
-        const res = await fetch(`/api/store?id=${id}`);
-        if (!res.ok) {
-          throw new Error('店舗が見つかりません');
+        // 2つのAPIを並列で叩く
+        const [baseRes, profileRes] = await Promise.all([
+          apiFetch(`/api/restaurants/${id}`, { method: "GET" }),
+          apiFetch(`/api/restaurants/${id}/profile`, {
+            method: "GET",
+          }),
+        ]);
+
+        // トークン失効チェック
+        if (
+          checkTokenExpired(baseRes, router) ||
+          checkTokenExpired(profileRes, router)
+        )
+          return;
+
+        // ステータスチェック
+        if (!baseRes.response.ok) {
+          const t = await baseRes.response.text().catch(() => "");
+          throw new Error(
+            `restaurants/${id} 取得失敗: ${baseRes.response.status} ${t}`
+          );
         }
-        const data = await res.json();
-        setRestaurant(data);
-      } catch (err) {
-        setError(err.message);
+        if (!profileRes.response.ok) {
+          const t = await profileRes.response.text().catch(() => "");
+          throw new Error(
+            `restaurants/${id}/profile 取得失敗: ${profileRes.response.status} ${t}`
+          );
+        }
+
+        const base = await baseRes.response.json();
+        const profile = await profileRes.response.json();
+
+        // 返却例に合わせてマージ
+        const merged = {
+          id: base.id,
+          name: base.name,
+          address: base.address ?? "",
+          postCode: base.postCode ?? "",
+          imageUrl: base.imageUrl || "/default-shop.png",
+          categories: Array.isArray(base.categoryDtoList)
+            ? base.categoryDtoList.map((c) =>
+                typeof c === "string" ? c : c?.name ?? ""
+              )
+            : [],
+
+          // プロフィール側
+          phone: profile.phone ?? "",
+          email: profile.email ?? "",
+          description: profile.description ?? "",
+          interiorImageUrl: profile.interiorImageUrl ?? "",
+          storeSchedules: profile.storeScheduleDtoList ?? [],
+        };
+
+        setRestaurant(merged);
+      } catch (e) {
+        console.error(e);
+        setFetchError(e.message ?? "エラーが発生しました");
       } finally {
         setLoading(false);
       }
-    }
-
-    fetchRestaurant();
-  }, [id]);
+    })();
+  }, [id, router]);
 
   if (loading) return <div>読み込み中...</div>;
-  if (error) return <div>{error}</div>;
+  if (fetchError) return <div>{fetchError}</div>;
 
 
 
@@ -71,8 +125,8 @@ export default function StoreDetailPage() {
       </p>
 
       <div className={styles.categoryContainer}>
-        {restaurant.categories.map((category, index) => (
-          <CategoryTag key={index} label={category} selected={true} />
+        {(restaurant.categoryDtoList || []).map((category, index) => (
+          <CategoryTag key={category.id} label={category.name} selected={true} />
         ))}
       </div>
 
