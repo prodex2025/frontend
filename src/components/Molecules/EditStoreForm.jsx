@@ -1,53 +1,138 @@
 'use client';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "@/styles/editModal.module.css";
-
-import { useParams } from 'next/navigation';
-import { restaurants, reataurants_categories } from '@/data/mockData';
 
 import ApprovalsInput from "@/components/atoms/ApprovalsInput";
 import ApprovalsImg from "@/components/atoms/ApprovalsImg";
 import CategoryList from "@/components/molecules/CategoryList";
+import { apiFetch, checkTokenExpired } from "@/hooks/useApiFetch";
+import { useUpload } from "@/hooks/useUpload";
 
-export default function EditStoreForm({ onClose }) {
-  const params = useParams();
-  const restaurantId = parseInt(params.id, 10);
-  const restaurant = restaurants.find(r => r.id === restaurantId);
+export default function EditStoreForm({ onClose, onSaved, restaurant }) {
+  const router = useRouter();
+  const { getPresignedPut, putToS3 } = useUpload();
+  if (!restaurant) return <div>店舗が見つかりませんでした。</div>;
 
-  if (!restaurant) {
-    return <div>店舗が見つかりませんでした。</div>;
-  }
+  // カテゴリ一覧（{id,name}）
+  const [allCategories, setAllCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [catError, setCatError] = useState(null);
 
-  // 店舗に紐づくカテゴリ ID の初期値を取得
-  const relatedCategoryIds = reataurants_categories
-    .filter(rc => rc.restaurant_id === restaurantId)
-    .map(rc => rc.category_id);
+  useEffect(() => {
+    (async () => {
+      setCatLoading(true);
+      setCatError(null);
+      try {
+        const res = await apiFetch("/api/categories", { method: "GET" });
+        if (checkTokenExpired(res, router)) return;
+        if (!res.response.ok) throw new Error(await res.response.text());
+        const data = await res.response.json();
+        const list = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+        setAllCategories(list.map((c) => ({ id: c.id, name: c.name })));
+      } catch (e) {
+        console.error(e);
+        setCatError(e.message ?? "カテゴリ取得に失敗しました");
+      } finally {
+        setCatLoading(false);
+      }
+    })();
+  }, [router]);
 
-  // 編集フォームの状態管理（モックデータコピー）
+  // ★ 選択カテゴリは ID 配列で管理
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+
+  // options 取得後に「レストランのカテゴリ名 → ID」に変換して初期選択をセット
+  useEffect(() => {
+    if (!allCategories.length) return;
+    const names = (restaurant.categories ?? [])
+      .map((c) => (typeof c === "string" ? c : c?.name))
+      .filter(Boolean);
+    const ids = allCategories
+      .filter((cat) => names.includes(cat.name))
+      .map((cat) => cat.id);
+    setSelectedCategoryIds(ids);
+  }, [allCategories, restaurant]);
+
+  // 画像や基本項目
   const [formData, setFormData] = useState({
-    name: restaurant.name,
-    address: restaurant.address,
-    categories: relatedCategoryIds || [],
-    image_url: restaurant.image_url || null,
+    name: restaurant.name ?? "",
+    address: restaurant.address ?? "",
+    postCode: restaurant.postCode ?? "0000000",
+    imageKey: restaurant.imageKey ?? "",
+    image_url: restaurant.imageUrl ?? "/default-shop.png",
   });
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // 入力変更
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // 画像変更
-  const handleImageChange = (newImageUrl) => {
-    setFormData(prev => ({ ...prev, image_url: newImageUrl }));
+  const handleImageChange = async (next) => {
+    if (typeof next === "string") {
+      setFormData((p) => ({ ...p, image_url: next }));
+      return;
+    }
+    const file = next?.target?.files?.[0] ?? (next instanceof File ? next : null);
+    if (!file) return;
+    try {
+      setUploading(true);
+      const presign = await getPresignedPut(file.name, "restaurant-image");
+      if (!presign) return;
+      const ok = await putToS3(presign.url, file, presign.contentType || file.type);
+      if (!ok) return alert("アップロードに失敗しました");
+      setFormData((p) => ({
+        ...p,
+        imageKey: presign.key,
+        image_url: URL.createObjectURL(file),
+      }));
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // 保存（フロントエンドのみ）
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("保存データ:", formData);
-    alert("編集が完了しました。");
-    if (onClose) onClose(); // 登録後にモーダルを閉じる
+    if (submitting || uploading) return;
+
+    // ★ ID → {id,name} に戻して payload を作成
+    const categoryDtoList = selectedCategoryIds
+      .map((id) => {
+        const found = allCategories.find((c) => c.id === id);
+        return found ? { id: found.id, name: found.name } : null;
+      })
+      .filter(Boolean);
+
+    const payload = {
+      restaurantName: formData.name,
+      restaurantAddress: formData.address,
+      restaurantPostCode: formData.postCode || "0000000",
+      exteriorTmpKey: formData.imageKey || "",
+      categoryDtoList,
+    };
+
+    try {
+      setSubmitting(true);
+      const res = await apiFetch(`/api/owner/restaurants/${restaurant.id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      if (checkTokenExpired(res, router)) return;
+      if (!res.response.ok) {
+        const t = await res.response.text().catch(() => "");
+        throw new Error(`更新に失敗しました：${res.response.status} ${t}`);
+      }
+      alert("編集が完了しました。");
+      onSaved && onSaved();
+      onClose && onClose();
+    } catch (err) {
+      console.error(err);
+      alert(err.message ?? "更新に失敗しました");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -57,53 +142,46 @@ export default function EditStoreForm({ onClose }) {
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.content}>
           <div className={styles.leftContent}>
-            {/* 店舗名 */}
             <ApprovalsInput
-              type="text"
-              name="name"
-              id="name"
-              text="店舗名"
-              value={formData.name}
-              onChange={handleChange}
+              type="text" name="name" id="name" text="店舗名"
+              value={formData.name} onChange={handleChange}
             />
 
-            {/* 店舗の外の写真 */}
             <ApprovalsImg
-              name="outsideImg"
-              id="outsideImg"
-              text="店外の写真"
+              name="outsideImg" id="outsideImg" text="店外の写真"
               value={formData.image_url}
-              onChange={handleImageChange} // ここで更新
+              onChange={handleImageChange}
+              disabled={uploading}
+              helperText={uploading ? "アップロード中..." : undefined}
             />
 
-            {/* 住所 */}
             <ApprovalsInput
-              type="text"
-              name="address"
-              id="address"
-              text="住所"
-              value={formData.address}
-              onChange={handleChange}
+              type="text" name="address" id="address" text="住所"
+              value={formData.address} onChange={handleChange}
             />
           </div>
 
           <div className={styles.rightContent}>
             <h3 className={styles.h3}>カテゴリー一覧</h3>
-            <CategoryList
-              selectedCategories={formData.categories}
-              setSelectedCategories={(newCats) =>
-                setFormData(prev => ({ ...prev, categories: newCats }))
-              }
-            />
+
+            {catLoading ? (
+              <p className={styles.p}>読み込み中...</p>
+            ) : catError ? (
+              <p className={styles.error}>カテゴリの取得に失敗しました</p>
+            ) : (
+              <CategoryList
+                options={allCategories}              // [{id,name}]
+                selectedIds={selectedCategoryIds}    // ★ ID 配列
+                onChange={setSelectedCategoryIds}    // ★ そのまま更新
+              />
+            )}
           </div>
         </div>
 
         <div className={styles.footerContent}>
-          <p className={styles.p}>
-            変更内容を確認後「登録」ボタンを押してください。
-          </p>
-          <button type="submit" className={styles.submitBtn}>
-            登録
+          <p className={styles.p}>変更内容を確認後「登録」ボタンを押してください。</p>
+          <button type="submit" className={styles.submitBtn} disabled={submitting || uploading}>
+            {submitting ? "送信中..." : "登録"}
           </button>
         </div>
       </form>
