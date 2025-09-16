@@ -1,89 +1,193 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import styles from '@/styles/EditMenuTab.module.css';
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import styles from "@/styles/EditMenuTab.module.css";
+import { useRouter } from "next/navigation";
 
-// コンポーネント
-import EditStoreModal from '@/components/molecules/EditStoreModal';
-import EditMenuRegistartionForm from '@/components/molecules/EditMenuRegistrationForm';
-import EditMenuForm from '@/components/molecules/EditMenuForm';
+// モーダル＆フォーム
+import EditStoreModal from "@/components/molecules/EditStoreModal";
+import EditMenuRegistartionForm from "@/components/molecules/EditMenuRegistrationForm";
+import EditMenuForm from "@/components/molecules/EditMenuForm";
 
-export default function EditMenuTab({ restaurant }) {
+// 認証付きフェッチ
+import { apiFetch, checkTokenExpired } from "@/hooks/useApiFetch";
+
+export default function EditMenuTab({ restaurant, onMenusChanged }) {
   if (!restaurant) return null;
 
-  // dishesの状態管理
+  // 一覧
   const [restaurantDishes, setRestaurantDishes] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // モーダル管理
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMenuModalOpen, setIsEditMenuModalOpen] = useState(false);
+  // モーダル
+  const [isModalOpen, setIsModalOpen] = useState(false); // 編集
+  const [isEditMenuModalOpen, setIsEditMenuModalOpen] = useState(false); // 追加
   const [editingDish, setEditingDish] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  // 初回読み込み & 更新時にメニュー取得
-  const fetchDishes = async () => {
-    const res = await fetch(`/api/dishes?restaurantId=${restaurant.id}`,{cache: 'no-store'});
-    // 返り値は配列で受けとる
-    const data = await res.json();
-    setRestaurantDishes(data.filter(d => d.restaurant_id === restaurant.id));
-  };
+  const router = useRouter();
+  const abortRef = useRef(null);
+
+  // --- 取得（GET /api/owner/restaurants/{restaurantId}/menus） ---
+  const fetchDishes = useCallback(async () => {
+    if (!restaurant?.id) return;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const result = await apiFetch(
+        `/api/owner/restaurants/${restaurant.id}/menus?page=0&size=10&sort=createdAt,desc`,
+        { method: "GET", signal: controller.signal }
+      );
+      if (checkTokenExpired(result, router)) return;
+
+      if (!result.response.ok) {
+        const t = await result.response.text().catch(() => "");
+        throw new Error(`取得に失敗しました: ${result.response.status} ${t}`);
+      }
+
+      const data = await result.response.json();
+      const list = Array.isArray(data?.content)
+        ? data.content
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      // 既存UIのまま使えるよう imageUrl → image_url に正規化
+      const normalized = list.map((d) => ({
+        id: d.id,
+        name: d.name,
+        price: d.price,
+        image_url: d.imageUrl || d.image_url || "/default-dish.png",
+        restaurant_id: restaurant.id,
+      }));
+
+      setRestaurantDishes(normalized);
+    } catch (e) {
+      if (e.name !== "AbortError") {
+        console.error(e);
+        setFetchError(e.message ?? "取得時にエラーが発生しました");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [restaurant?.id, router]);
 
   useEffect(() => {
     fetchDishes();
-  }, [restaurant.id]);
+    return () => abortRef.current?.abort();
+  }, [fetchDishes]);
 
-  // 編集アイコン
-  const handleEdit = (dish) => {
-    setEditingDish(dish);
-    setIsAdding(false);
-    setIsModalOpen(true);
+  // --- 追加（POST /api/owner/restaurants/{restaurantId}/menus） ---
+  const createMenu = async (payload) => {
+    try {
+      const res = await apiFetch(
+        `/api/owner/restaurants/${restaurant.id}/menus`,
+        { method: "POST", body: JSON.stringify(payload) }
+      );
+      if (checkTokenExpired(res, router)) return false;
+
+      if (!res.response.ok) {
+        const t = await res.response.text().catch(() => "");
+        throw new Error(`登録に失敗しました: ${res.response.status} ${t}`);
+      }
+      await fetchDishes();
+      return true;
+    } catch (e) {
+      console.error(e);
+      alert(e.message ?? "メニューの登録に失敗しました");
+      return false;
+    }
   };
 
-  // 追加カード
-  const handleAdd = () => {
-    setEditingDish(null);
-    setIsAdding(true);
-    setIsModalOpen(true);
+  // --- 更新（PUT /api/owner/restaurants/{restaurantId}/menus/{menuId}） ---
+  const updateMenu = async (menuId, payload) => {
+    try {
+      const res = await apiFetch(
+        `/api/owner/restaurants/${restaurant.id}/menus/${menuId}`,
+        { method: "PUT", body: JSON.stringify(payload) }
+      );
+      if (checkTokenExpired(res, router)) return false;
+
+      if (!res.response.ok) {
+        const t = await res.response.text().catch(() => "");
+        throw new Error(`更新に失敗しました: ${res.response.status} ${t}`);
+      }
+      await fetchDishes();
+      return true;
+    } catch (e) {
+      console.error(e);
+      alert(e.message ?? "メニューの更新に失敗しました");
+      return false;
+    }
   };
 
-  // 削除アイコン（/api/dishes?id=:id を DELETE）
+  // --- 削除（DELETE /api/owner/restaurants/{restaurantId}/menus/{menuId}） ---
   const handleDelete = async (dish) => {
     if (deletingId !== null) return; // 連打防止
     if (!confirm(`「${dish.name}」を削除しますか？`)) return;
 
     setDeletingId(dish.id);
 
-    // 楽観的更新：先にUIから消す（失敗時はロールバック）
-    const prev = restaurantDishes;
+    // 楽観的に一旦消す（そのままでもOKだが、最終的に必ず再取得する）
     setRestaurantDishes((list) => list.filter((d) => d.id !== dish.id));
 
     try {
-      const res = await fetch(`/api/dishes?id=${dish.id}`, { method: 'DELETE' });
+      const res = await apiFetch(
+        `/api/owner/restaurants/${restaurant.id}/menus/${dish.id}`,
+        { method: "DELETE" }
+      );
+      if (checkTokenExpired(res, router)) return;
 
-      if (!res.ok) {
-        // ロールバック
-        setRestaurantDishes(prev);
-        const data = await res.json().catch(() => ({}));
-        alert(data.message ?? '削除に失敗しました。');
+      if (!res.response.ok) {
+        // 失敗時は最新状態で再同期（ロールバックより確実）
+        await fetchDishes();
+        const t = await res.response.text().catch(() => "");
+        alert(`削除に失敗しました: ${res.response.status} ${t}`);
         return;
       }
 
-      // モック運用なら再取得は省略可。常に正確にしたいなら↓を有効化
-      // await fetchDishes();
+      // 成功時も必ずサーバーの真実に合わせて再取得
+      await fetchDishes();
+      onMenusChanged && onMenusChanged();
     } catch (e) {
-      setRestaurantDishes(prev); // ロールバック
-      alert('通信エラーが発生しました。');
       console.error(e);
+      alert("通信エラーが発生しました。");
+      // エラー時も最新状態に合わせる
+      await fetchDishes();
     } finally {
       setDeletingId(null);
     }
   };
 
+  // --- モーダル開閉 ---
+  const handleEdit = (dish) => {
+    setEditingDish(dish);
+    setIsAdding(false);
+    setIsModalOpen(true); // 編集モーダル
+  };
+
+  const handleAdd = () => {
+    setEditingDish(null);
+    setIsAdding(true);
+    setIsEditMenuModalOpen(true); // 追加モーダル
+  };
+
   return (
     <div className={styles.menuContainer}>
-      {restaurantDishes.length === 0 ? (
-        <div className={styles.empty}>メニュー情報がありません。
+      {/* 既存UIのまま */}
+      {loading ? (
+        <div className={styles.empty}>読み込み中...</div>
+      ) : fetchError ? (
+        <div className={styles.empty}>取得に失敗しました：{fetchError}</div>
+      ) : restaurantDishes.length === 0 ? (
+        <div className={styles.empty}>
+          メニュー情報がありません。
           <div className={styles.menuGrid}>
             {/* メニュー追加カード */}
             <div
@@ -99,9 +203,7 @@ export default function EditMenuTab({ restaurant }) {
             </div>
           </div>
         </div>
-        
-      ) : 
-      (
+      ) : (
         <div className={styles.menuGrid}>
           {/* メニュー追加カード */}
           <div
@@ -123,6 +225,7 @@ export default function EditMenuTab({ restaurant }) {
                 <span
                   className={`${styles.icon} material-symbols-outlined`}
                   onClick={() => handleDelete(dish)}
+                  aria-disabled={deletingId === dish.id}
                 >
                   delete
                 </span>
@@ -133,15 +236,16 @@ export default function EditMenuTab({ restaurant }) {
                   edit
                 </span>
               </div>
+
               <img
-                src={dish.image_url.replace('@', '')}
+                src={dish.image_url.replace("@", "")}
                 alt={dish.name}
                 className={styles.menuImage}
               />
               <div className={styles.menuInfo}>
                 <div className={styles.dishName}>{dish.name}</div>
                 <div className={styles.price}>
-                  ￥{dish.price.toLocaleString()}
+                  ￥{Number(dish.price ?? 0).toLocaleString()}
                   <span className={styles.tax}>（税込み）</span>
                 </div>
               </div>
@@ -150,31 +254,45 @@ export default function EditMenuTab({ restaurant }) {
         </div>
       )}
 
-      {/* 追加モーダル */}
-      <EditStoreModal open={isEditMenuModalOpen} onClose={() => setIsEditMenuModalOpen(false)}>
+      {/* 追加モーダル（UIそのまま） */}
+      <EditStoreModal
+        open={isEditMenuModalOpen}
+        onClose={() => setIsEditMenuModalOpen(false)}
+      >
         <EditMenuRegistartionForm
           restaurantId={restaurant.id}
           dish={editingDish}
           isAdding={isAdding}
-          onSuccess={async()=>{
+          // 親で送信（フォーム側が onSubmit を呼べるならこちらが使われる）
+          onSubmit={async (payload) => {
+            const ok = await createMenu(payload);
+            if (ok) setIsEditMenuModalOpen(false);
+          }}
+          // 互換: フォーム内で送信後に onSuccess が呼ばれる場合も再取得
+          onSuccess={async () => {
             await fetchDishes();
             setIsEditMenuModalOpen(false);
           }}
-          onCancel = {() => setIsEditMenuModalOpen(false)}
+          onCancel={() => setIsEditMenuModalOpen(false)}
         />
       </EditStoreModal>
 
-      {/* 編集モーダル */}
+      {/* 編集モーダル（UIそのまま） */}
       <EditStoreModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <EditMenuForm
           restaurantId={restaurant.id}
           dish={editingDish}
-          isAdding={isAdding}
-          onSuccess={async()=>{
+          isAdding={false}
+          onSubmit={async (payload) => {
+            if (!editingDish?.id) return;
+            const ok = await updateMenu(editingDish.id, payload);
+            if (ok) setIsModalOpen(false);
+          }}
+          onSuccess={async () => {
             await fetchDishes();
             setIsModalOpen(false);
           }}
-          onCancel = {() => setIsModalOpen(false)}
+          onCancel={() => setIsModalOpen(false)}
         />
       </EditStoreModal>
     </div>
