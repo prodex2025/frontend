@@ -1,41 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import styles from '@/styles/StoreDetailTab.module.css';
-import dynamic from 'next/dynamic';
-//import { restaurants_business_calendar } from '@/data/mockData'; 
+import React from "react";
+import styles from "@/styles/StoreDetailTab.module.css";
+import dynamic from "next/dynamic";
 
+const MapWithGeocode = dynamic(
+  () => import("@/components/atoms/MapWithGeocode"),
+  { ssr: false }
+);
 
-// dynamic importでSSRオフにする
-const MapWithGeocode = dynamic(() => import('@/components/atoms/MapWithGeocode'), {
-  ssr: false,
-});
+const WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日", "祝日"];
 
-// 曜日の配列（インデックスでアクセスする用）
-const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土', '祝日'];
-
-// 分（minutes）を「HH:MM」の文字列に変換
+// number(分) → "HH:MM"
 function minutesToTime(min) {
   const h = Math.floor(min / 60);
   const m = min % 60;
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
 
+// "HH:mm:ss"や"HH:mm"やnumberに全部対応
+function fmtTime(t) {
+  if (t == null || t === "") return "";
+  if (typeof t === "number") return minutesToTime(t);
+  // 文字列は先頭5文字（HH:mm）だけ出す
+  return String(t).slice(0, 5);
+}
 
-// 電話番号をハイフン付きで整形（例: 080-1234-5678）
 function formatPhoneNumber(number) {
-  if (!number) return '';
-  const clean = number.replace(/[^\d]/g, '');
-
-  if (clean.length === 11) {
+  if (!number) return "";
+  const clean = number.replace(/[^\d]/g, "");
+  if (clean.length === 11)
     return `${clean.slice(0, 3)}-${clean.slice(3, 7)}-${clean.slice(7)}`;
-  } else if (clean.length === 10) {
+  if (clean.length === 10)
     return `${clean.slice(0, 2)}-${clean.slice(2, 6)}-${clean.slice(6)}`;
-  } else {
-    return number; // 整形できない場合はそのまま
-  }
+  return number;
 }
 
-// メインコンポーネント
 export default function StoreDetailTab({ restaurant }) {
+  if (!restaurant) return null;
+
+  // ← どちらのキーでも拾えるように
+  const businessHours =
+    restaurant.storeScheduleDtoList ?? restaurant.storeSchedules ?? [];
+
+  // dayOfWeek をキー化（0..7）
+  const weekdayMap = Object.fromEntries(
+    (businessHours || []).map((b) => [b.dayOfWeek, b])
 
   useEffect(() => {
     console.log("📦 StoreDetailTab に渡ってきた restaurant.storeSchedules:", restaurant?.storeSchedules);
@@ -53,6 +61,16 @@ export default function StoreDetailTab({ restaurant }) {
   const weekdayMap = Object.fromEntries(
     businessHours.map((b) => [b.dayOfWeek, b])
   );
+
+  const closedLabel =
+    (businessHours || [])
+      .filter((b) => b.isClosed)
+      .map((b) =>
+        WEEKDAYS[b.dayOfWeek] === "祝日"
+          ? "祝日"
+          : `${WEEKDAYS[b.dayOfWeek]}曜日`
+      )
+      .join("、") || "なし";
 
   return (
     <div className={styles.container}>
@@ -144,5 +162,5 @@ export default function StoreDetailTab({ restaurant }) {
             </div>
       </div>      
     </div>
-);
+  );
 }

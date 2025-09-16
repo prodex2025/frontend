@@ -1,49 +1,71 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import styles from '@/styles/StoreMenuTab.module.css';
-import Link from 'next/link';
+import React from "react";
+import styles from "@/styles/StoreMenuTab.module.css";
+import Link from "next/link";
+import Pagination from "@/components/atoms/Pagination.jsx";
 
-export default function StoreMenuTab({ restaurant }) {
-  if (!restaurant) return null;
-
-  // dishesの状態管理
-    const [restaurantDishes, setRestaurantDishes] = useState([]);
-
-  // 初回読み込み & 更新時にメニュー取得
-  const fetchDishes = async () => {
-    const res = await fetch(`/api/dishes?restaurantId=${restaurant.id}`,{cache: 'no-store'});
-    const data = await res.json();
-    setRestaurantDishes(data.filter(d => d.restaurant_id === restaurant.id));
-  };
-
-  useEffect(() => {
-    fetchDishes();
-  }, [restaurant.id]);
+export default function StoreMenuTab({
+  items = [],
+  loading = false,
+  error = null,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+}) {
+  if (loading) return <div className={styles.empty}>読み込み中...</div>;
+  if (error)
+    return <div className={styles.empty}>取得に失敗しました：{error}</div>;
+  if (!items.length)
+    return <div className={styles.empty}>メニュー情報がありません。</div>;
 
   return (
     <div className={styles.menuContainer}>
-      {restaurantDishes.length === 0 ? (
-        <div className={styles.empty}>メニュー情報がありません。</div>
-      ) : (
-        <div className={styles.menuGrid}>
-          {restaurantDishes.map((dish) => (
+      <div className={styles.menuGrid}>
+        {items.map((dish) => {
+          const rid =
+            dish.restaurantId ?? dish.restaurant_id ?? dish.restaurant ?? "";
+          const img = (
+            dish.imageUrl ||
+            dish.image_url ||
+            "/default-dish.png"
+          ).replace("@", "");
+          const price =
+            typeof dish.price === "number"
+              ? dish.price
+              : Number(dish.price ?? 0);
+
+          return (
             <div key={dish.id} className={styles.menuCard}>
-              <Link href={{
-                pathname: `/owner/dashboard/${dish.restaurant_id}/menu/${dish.id}`,
-                query: { from: `/store/list/details/${dish.restaurant_id}` }, // ← ここだけ追加
-              }}
+              <Link
+                href={{
+                  pathname: rid
+                    ? `/owner/dashboard/${rid}/menu/${dish.id}`
+                    : `/owner/dashboard/menu/${dish.id}`,
+                  query: rid
+                    ? { from: `/store/list/details/${rid}` }
+                    : undefined,
+                }}
               >
-                <img src={dish.image_url.replace('@', '')} alt={dish.name} className={styles.menuImage} />
+                <img src={img} alt={dish.name} className={styles.menuImage} />
                 <div className={styles.menuInfo}>
                   <div className={styles.dishName}>{dish.name}</div>
-                  <div className={styles.price}>￥{dish.price.toLocaleString()}<span className={styles.tax}>（税込み）</span></div>
+                  <div className={styles.price}>
+                    ￥{price.toLocaleString()}
+                    <span className={styles.tax}>（税込み）</span>
+                  </div>
                 </div>
               </Link>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
