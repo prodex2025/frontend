@@ -1,29 +1,34 @@
+// src/components/molecules/CategoryList.jsx
 import React from "react";
 import styles from "@/styles/editModal.module.css";
-import { categories } from "@/data/mockData";
 
-export default function CategoryList({ selectedCategories, setSelectedCategories }) {
-  const toggleCategory = (categoryId) => {
-    const alreadySelected = selectedCategories.includes(categoryId);
-    const newSelected = alreadySelected
-      ? selectedCategories.filter(id => id !== categoryId)
-      : [...selectedCategories, categoryId];
-
-    setSelectedCategories(newSelected);
+/**
+ * props:
+ * - options: { id: string, name: string }[]
+ * - selectedIds: string[]                // ★ ID配列で管理
+ * - onChange: (nextIds: string[]) => void
+ */
+export default function CategoryList({ options = [], selectedIds = [], onChange }) {
+  const toggle = (id) => {
+    onChange(
+      selectedIds.includes(id)
+        ? selectedIds.filter((x) => x !== id)
+        : [...selectedIds, id]
+    );
   };
 
   return (
     <div className={styles.categoryList}>
-      {categories.map(cat => {
-        const isSelected = selectedCategories.includes(cat.id);
+      {options.map(({ id, name }) => {
+        const selected = selectedIds.includes(id);
         return (
           <button
-            key={cat.id}
+            key={id}
             type="button"
-            onClick={() => toggleCategory(cat.id)}
-            className={`${styles.category} ${isSelected ? styles.selected : ''}`}
+            onClick={() => toggle(id)}
+            className={`${styles.category} ${selected ? styles.selected : ""}`}
           >
-            {cat.name}
+            {name}
           </button>
         );
       })}

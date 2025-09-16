@@ -99,75 +99,73 @@ export default function StoreDetailPage() {
   }, [restaurantId]);
 
   // API から詳細取得
-  useEffect(() => {
+  const fetchRestaurant = async () => {
     if (!restaurantId) return;
-    (async () => {
+    try {
       setLoading(true);
       setFetchError(null);
-      try {
-        // 2つのAPIを並列で叩く
-        const [baseRes, profileRes] = await Promise.all([
-          apiFetch(`/api/owner/restaurants/${restaurantId}`, { method: "GET" }),
-          apiFetch(`/api/owner/restaurants/${restaurantId}/profile`, {
-            method: "GET",
-          }),
-        ]);
 
-        // トークン失効チェック
-        if (
-          checkTokenExpired(baseRes, router) ||
-          checkTokenExpired(profileRes, router)
-        )
-          return;
+      // 2つのAPIを並列で叩く
+      const [baseRes, profileRes] = await Promise.all([
+        apiFetch(`/api/owner/restaurants/${restaurantId}`, { method: "GET" }),
+        apiFetch(`/api/owner/restaurants/${restaurantId}/profile`, {
+          method: "GET",
+        }),
+      ]);
 
-        // ステータスチェック
-        if (!baseRes.response.ok) {
-          const t = await baseRes.response.text().catch(() => "");
-          throw new Error(
-            `restaurants/${restaurantId} 取得失敗: ${baseRes.response.status} ${t}`
-          );
-        }
-        if (!profileRes.response.ok) {
-          const t = await profileRes.response.text().catch(() => "");
-          throw new Error(
-            `restaurants/${restaurantId}/profile 取得失敗: ${profileRes.response.status} ${t}`
-          );
-        }
+      if (
+        checkTokenExpired(baseRes, router) ||
+        checkTokenExpired(profileRes, router)
+      )
+        return;
 
-        const base = await baseRes.response.json();
-        const profile = await profileRes.response.json();
-
-        // 返却例に合わせてマージ
-        const merged = {
-          id: base.id,
-          name: base.name,
-          address: base.address ?? "",
-          postCode: base.postCode ?? "",
-          imageUrl: base.imageUrl || "/default-shop.png",
-          categories: Array.isArray(base.categoryDtoList)
-            ? base.categoryDtoList.map((c) =>
-                typeof c === "string" ? c : c?.name ?? ""
-              )
-            : [],
-
-          // プロフィール側
-          phone: profile.phone ?? "",
-          email: profile.email ?? "",
-          description: profile.description ?? "",
-          interiorImageUrl: profile.interiorImageUrl ?? "",
-          storeSchedules: profile.storeScheduleDtoList ?? [],
-        };
-
-        setRestaurant(merged);
-      } catch (e) {
-        console.error(e);
-        setFetchError(e.message ?? "エラーが発生しました");
-      } finally {
-        setLoading(false);
+      if (!baseRes.response.ok) {
+        const t = await baseRes.response.text().catch(() => "");
+        throw new Error(
+          `restaurants/${restaurantId} 取得失敗: ${baseRes.response.status} ${t}`
+        );
       }
-    })();
-  }, [restaurantId, router]);
+      if (!profileRes.response.ok) {
+        const t = await profileRes.response.text().catch(() => "");
+        throw new Error(
+          `restaurants/${restaurantId}/profile 取得失敗: ${profileRes.response.status} ${t}`
+        );
+      }
 
+      const base = await baseRes.response.json();
+      const profile = await profileRes.response.json();
+
+      const merged = {
+        id: base.id,
+        name: base.name,
+        address: base.address ?? "",
+        postCode: base.postCode ?? "",
+        imageUrl: base.imageUrl || "/default-shop.png",
+        categories: Array.isArray(base.categoryDtoList)
+          ? base.categoryDtoList.map((c) =>
+              typeof c === "string" ? c : c?.name ?? ""
+            )
+          : [],
+        phone: profile.phone ?? "",
+        email: profile.email ?? "",
+        description: profile.description ?? "",
+        interiorImageUrl: profile.interiorImageUrl ?? "",
+        storeSchedules: profile.storeScheduleDtoList ?? [],
+      };
+
+      setRestaurant(merged);
+    } catch (e) {
+      console.error(e);
+      setFetchError(e.message ?? "エラーが発生しました");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初回ロード
+  useEffect(() => {
+    fetchRestaurant();
+  }, [restaurantId, router]);
   // ローディング/エラー
   if (loading) return <div className={styles.wrapper}>読み込み中...</div>;
   if (fetchError)
@@ -310,7 +308,14 @@ export default function StoreDetailPage() {
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
       >
-        <EditStoreForm onClose={() => setEditModalOpen(false)} />
+        <EditStoreForm
+          restaurant={restaurant}
+          onClose={() => setEditModalOpen(false)}
+          onSaved={async () => {
+            // 保存後に最新を取り直してラベル(Chip)を更新
+            await fetchRestaurant();
+          }}
+        />
       </EditStoreModal>
     </div>
   );
