@@ -83,3 +83,27 @@
   }
 }
 
+.timeIndent {
+  margin-left: 2em;
+}
+
+.timeRow {
+  display: flex;
+  align-items: baseline;
+  margin-top: 0.2em;
+  flex-wrap: wrap; /* ← これで、狭い画面でも崩れにくく */
+}
+
+.weekday {
+  display: inline-block;
+  min-width: 3em; /* 曜日の固定幅（調整可） */
+}
+
+.lunch {
+  display: inline-block;
+}
+
+.dinnerIndent {
+  margin-left: 3em; /* .weekday と同じ幅にすることで揃う */
+  white-space: nowrap; /* ← 折り返さないようにする！ */
+}

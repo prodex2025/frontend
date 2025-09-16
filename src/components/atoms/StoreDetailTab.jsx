@@ -44,6 +44,22 @@ export default function StoreDetailTab({ restaurant }) {
   // dayOfWeek をキー化（0..7）
   const weekdayMap = Object.fromEntries(
     (businessHours || []).map((b) => [b.dayOfWeek, b])
+
+  useEffect(() => {
+    console.log("📦 StoreDetailTab に渡ってきた restaurant.storeSchedules:", restaurant?.storeSchedules);
+  }, [restaurant]);
+
+  if (!restaurant) return null;
+    
+  if (!restaurant) return null;
+
+  // 対象店舗の営業時間だけ抽出
+  const businessHours = restaurant.storeSchedules || [];
+
+  // 営業日(曜日番号)リスト
+  const openDays = businessHours.map((b) => b.dayOfWeek);
+  const weekdayMap = Object.fromEntries(
+    businessHours.map((b) => [b.dayOfWeek, b])
   );
 
   const closedLabel =
@@ -58,87 +74,93 @@ export default function StoreDetailTab({ restaurant }) {
 
   return (
     <div className={styles.container}>
-      {/* 左：画像＆地図 */}
-      <div className={styles.imageWrapper}>
-        <img
-          src={restaurant.interiorImageUrl || "/default-shop.png"}
-          alt={`${restaurant.name} の画像`}
-          className={styles.detailImage}
-        />
-        <MapWithGeocode address={restaurant.address} />
-      </div>
+        {/* 左：画像エリア */}
+        <div className={styles.imageWrapper}>
+            <img
+            src={restaurant.interiorImageUrl}
+            alt={`${restaurant.name} の画像`}
+            className={styles.detailImage}
+            />
 
-      {/* 右：情報 */}
-      <div className={styles.contentWrapper}>
-        <div className={styles.infoBlock}>
-          {/* 営業時間 */}
-          <div className={styles.row}>
-            <span className={styles.label}>営業時間</span>
-            <span className={styles.colon}>：</span>
-            <span className={styles.value}>
-              {Object.entries(weekdayMap)
-                .sort((a, b) => Number(a[0]) - Number(b[0]))
-                .map(([day, info], i) => (
-                  <React.Fragment key={day}>
-                    {i > 0 && <br />}（{WEEKDAYS[Number(day)]}）
-                    {info.isClosed ? (
-                      "定休日"
-                    ) : (
-                      <>
-                        {!info.isLunchClosed &&
-                          info.lunchStart &&
-                          info.lunchEnd && (
-                            <>
-                              ランチ {fmtTime(info.lunchStart)}〜
-                              {fmtTime(info.lunchEnd)}
-                            </>
-                          )}
-                        {!info.isDinnerClosed &&
-                          info.dinnerStart &&
-                          info.dinnerEnd && (
-                            <>
-                              ディナー {fmtTime(info.dinnerStart)}〜
-                              {fmtTime(info.dinnerEnd)}
-                            </>
-                          )}
-                      </>
-                    )}
-                  </React.Fragment>
-                ))}
-            </span>
-          </div>
+            {/* ここに地図を表示 */}
+            <MapWithGeocode address={restaurant.address} />
+            
 
-          {/* 定休日 */}
-          <div className={styles.row}>
-            <span className={styles.label}>定休日</span>
-            <span className={styles.colon}>：</span>
-            <span className={styles.value}>{closedLabel}</span>
-          </div>
-
-          {/* アクセス */}
-          <div className={styles.row}>
-            <span className={styles.label}>アクセス</span>
-            <span className={styles.colon}>：</span>
-            <span className={styles.value}>{restaurant.address}</span>
-          </div>
-
-          {/* TEL */}
-          <div className={styles.row}>
-            <span className={styles.label}>TEL</span>
-            <span className={styles.colon}>：</span>
-            <span className={styles.value}>
-              {formatPhoneNumber(restaurant.phone)}
-            </span>
-          </div>
-
-          {/* Email */}
-          <div className={styles.row}>
-            <span className={styles.label}>Email</span>
-            <span className={styles.colon}>：</span>
-            <span className={styles.value}>{restaurant.email}</span>
-          </div>
         </div>
-      </div>
+
+        {/* 右：店舗情報エリア */}
+        <div className={styles.contentWrapper}>
+            <div className={styles.infoBlock}>
+                {/* 営業時間 */}
+                <div className={styles.row}>
+                    <span className={styles.label}>営業時間</span>
+                    <span className={styles.colon}>：</span>
+                    <span className={styles.value}>
+                        {Object.entries(weekdayMap)
+                        .filter(([_, info]) => !info.isClosed)
+                        .map(([day,info], index) => (
+                        <React.Fragment key={day}>
+                          {index > 0 && <br />}
+                          <div className={styles.timeRow}>
+                            <span className={styles.weekday}>（{WEEKDAYS[Number(day)]}）</span>
+                            {info.lunchStart && (
+                              <span className={styles.lunch}>
+                                ランチ {info.lunchStart.slice(0, 5)}〜{info.lunchEnd.slice(0, 5)}
+                              </span>
+                            )}
+                          </div>
+                          {info.dinnerStart && (
+                            <div className={styles.dinnerIndent}>
+                              ディナー {info.dinnerStart.slice(0, 5)}〜{info.dinnerEnd.slice(0, 5)}
+                            </div>
+                          )}
+                        </React.Fragment>
+                        ))}
+                    </span>
+                </div>
+
+                {/* 定休日 */}
+                <div className={styles.row}>
+                    <span className={styles.label}>定休日</span>
+                    <span className={styles.colon}>：</span>
+                    <span className={styles.value}>
+                      {businessHours.some(b => b.isClosed) ? (
+                        businessHours
+                          .filter(b => b.isClosed)
+                          .map(b => {
+                            const name = WEEKDAYS[b.dayOfWeek];
+                            return name === '祝日' ? '祝日' : `${name}曜日`;
+                          })
+                          .join('、')
+                      ) : (
+                        'なし'
+                      )}
+                    </span>
+                </div>
+                
+                {/* アクセス */}
+                <div className={styles.row}>
+                    <span className={styles.label}>アクセス</span>
+                    <span className={styles.colon}>：</span>
+                    <span className={styles.value}>{restaurant.address}</span>
+                </div>
+                
+                {/* 電話番号（整形済） */}
+                <div className={styles.row}>
+                    <span className={styles.label}>TEL</span>
+                    <span className={styles.colon}>：</span>
+                    <span className={styles.value}>{formatPhoneNumber(restaurant.phone)}</span>
+                </div>
+
+                {/* Email（そのまま表示） */}
+                <div className={styles.row}>
+                <span className={styles.label}>Email</span>
+                <span className={styles.colon}>：</span>
+                <span className={styles.value}>{restaurant.email}</span>
+                </div>
+
+            </div>
+      </div>      
     </div>
   );
 }
