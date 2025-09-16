@@ -8,6 +8,7 @@ import ApprovalsButton from "@/components/atoms/ApprovalsButton";
 import ApprovalsInput from "@/components/atoms/ApprovalsInput";
 import ApprovalsTextarea from "@/components/atoms/ApprovalsTextarea";
 import ApprovalsImg from "@/components/atoms/ApprovalsImg";
+import BusinessHoursTable from "@/components/Molecules/BusinessHoursTable";
 
 import { apiFetch, checkTokenExpired } from "@/hooks/useApiFetch";
 import { useUpload } from "@/hooks/useUpload";
